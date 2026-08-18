@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" fill="none">
+  <rect width="48" height="48" rx="11" fill="#0F0F0F"/>
+  <path d="M9 27h5l3.5-9 3.5 13 3.5-7 3.5 5H39" stroke="url(#ep-pulse-lg)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="39" cy="27" r="2.5" fill="#7C5CFC"/>
+  <text x="58" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#8A8F98">Event</text>
+  <text x="118" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" fill="#0F0F0F">Pulse</text>
+  <rect x="118" y="38" width="52" height="3" rx="1.5" fill="url(#ep-pulse-lg)"/>
+  <defs>
+    <linearGradient id="ep-pulse-lg" x1="9" y1="24" x2="170" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5A36"/>
+      <stop offset="1" stop-color="#7C5CFC"/>
+    </linearGradient>
+  </defs>
+</svg>

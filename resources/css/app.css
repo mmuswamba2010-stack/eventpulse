@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer base {
+    body {
+        @apply bg-cream text-charcoal antialiased;
+    }
+
+    ::selection {
+        background-color: rgba(124, 92, 252, 0.2);
+        color: #0f0f0f;
+    }
+}
+
+@layer components {
+    .ep-logo-text {
+        @apply font-display text-[1.05rem] sm:text-lg font-bold tracking-tight leading-none;
+    }
+
+    .ep-btn {
+        @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-coral hover:bg-coral-soft text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-coral/40 focus:ring-offset-2 focus:ring-offset-cream disabled:opacity-50;
+    }
+
+    .ep-btn-violet {
+        @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-violet hover:bg-violet-soft text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-violet/40 focus:ring-offset-2;
+    }
+
+    .ep-btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-frost hover:text-charcoal transition no-underline;
+    }
+
+    .ep-btn-outline {
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 border border-charcoal/10 bg-white hover:border-charcoal/25 text-charcoal text-sm font-semibold rounded-lg transition no-underline;
+    }
+
+    .ep-card {
+        @apply bg-white border border-charcoal/[0.07] rounded-xl shadow-card overflow-hidden;
+    }
+
+    .ep-event-card {
+        @apply bg-white border border-charcoal/[0.08] rounded-xl shadow-card overflow-hidden transition-shadow duration-200 hover:shadow-lift;
+    }
+
+    .ep-btn-card {
+        @apply inline-flex items-center justify-center px-4 py-2 bg-coral text-white text-sm font-semibold rounded-lg shrink-0;
+    }
+
+    .ep-input {
+        @apply w-full rounded-lg border-charcoal/10 bg-white text-charcoal placeholder:text-frost focus:border-violet focus:ring-violet/25 text-sm;
+    }
+
+    .ep-chip {
+        @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition;
+    }
+
+    .ep-chip-active {
+        @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition bg-charcoal text-white;
+    }
+
+    .ep-chip-idle {
+        @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition bg-white text-frost border border-charcoal/10 hover:border-charcoal/25 hover:text-charcoal;
+    }
+
+    .ep-search-bar {
+        @apply flex items-center gap-1 bg-white border border-charcoal/10 rounded-lg p-1 w-full;
+    }
+
+    .ep-filter {
+        @apply inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold no-underline transition select-none;
+    }
+
+    .ep-filter-active {
+        @apply inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold no-underline transition select-none bg-charcoal text-white shadow-sm;
+    }
+
+    .ep-filter-idle {
+        @apply inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold no-underline transition select-none bg-[#ECECEE] text-charcoal hover:bg-[#E2E3E6];
+    }
+
+    /* Onglets catégories (desktop) — soulignement, pas de pastille */
+    .ep-tab-idle {
+        @apply inline-flex items-center px-4 py-3.5 text-sm font-medium text-frost border-b-2 border-transparent no-underline whitespace-nowrap transition hover:text-charcoal;
+    }
+
+    .ep-tab-active {
+        @apply inline-flex items-center px-4 py-3.5 text-sm font-semibold text-charcoal border-b-2 border-coral no-underline whitespace-nowrap;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c8ccd4;
+    border-radius: 999px;
+}
