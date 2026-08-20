@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('ticket_number', 20)->nullable()->unique()->after('ticket_code');
         });
 
-        Ticket::query()
+        Ticket::withoutGlobalScopes()
             ->whereNull('ticket_number')
             ->orderBy('id')
             ->each(function (Ticket $ticket) {

@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Alphabet sans caractères ambigus (pas de 0/O ni 1/I).
@@ -24,6 +25,7 @@ class Ticket extends Model
         'event_id',
         'ticket_type_id',
         'user_id',
+        'payment_id',
         'ticket_code',
         'ticket_number',
         'seat_number',
@@ -80,6 +82,16 @@ class Ticket extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
+    public function isPendingPayment(): bool
+    {
+        return $this->status === 'pending';
     }
 
     public function scans(): HasMany
@@ -144,7 +156,7 @@ class Ticket extends Model
     {
         do {
             $number = 'EP-'.static::randomHumanBlock(4).'-'.static::randomHumanBlock(4);
-        } while (static::where('ticket_number', $number)->exists());
+        } while (static::withoutGlobalScopes()->where('ticket_number', $number)->exists());
 
         return $number;
     }

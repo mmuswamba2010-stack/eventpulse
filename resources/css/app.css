@@ -54,6 +54,12 @@
         @apply w-full rounded-lg border-charcoal/10 bg-white text-charcoal placeholder:text-frost focus:border-violet focus:ring-violet/25 text-sm;
     }
 
+    .ep-password-toggle svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+    }
+
     .ep-chip {
         @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition;
     }
@@ -100,4 +106,47 @@
 ::-webkit-scrollbar-thumb {
     background: #c8ccd4;
     border-radius: 999px;
+}
+
+.dark body {
+    @apply bg-[#0F0F0F] text-[#FAFAFA];
+}
+
+.dark ::selection {
+    background-color: rgba(124, 92, 252, 0.35);
+    color: #fafafa;
+}
+
+.dark .ep-card,
+.dark .ep-event-card {
+    @apply bg-[#1A1A1A] border-white/10;
+}
+
+.dark .ep-input {
+    @apply bg-[#141414] border-white/10 text-[#FAFAFA] placeholder:text-frost;
+}
+
+.dark .ep-btn-outline {
+    @apply bg-[#1A1A1A] border-white/15 text-[#FAFAFA] hover:border-white/30;
+}
+
+.dark .ep-search-bar {
+    @apply bg-[#141414] border-white/10;
+}
+
+.dark .ep-chip-idle,
+.dark .ep-filter-idle {
+    @apply bg-[#1A1A1A] text-frost border-white/10 hover:text-[#FAFAFA];
+}
+
+.dark .ep-tab-idle {
+    @apply text-frost hover:text-[#FAFAFA];
+}
+
+.dark .ep-btn {
+    @apply focus:ring-offset-[#0F0F0F];
+}
+
+.dark .ep-event-card .text-charcoal {
+    @apply text-[#FAFAFA];
 }

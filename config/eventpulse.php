@@ -59,4 +59,53 @@ return [
         'mobile_money_phone' => env('EVENTPULSE_MOBILE_PHONE'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Téléphone — format RDC (+243)
+    |--------------------------------------------------------------------------
+    */
+
+    'phone' => [
+        'country_code' => env('EVENTPULSE_PHONE_COUNTRY_CODE', '+243'),
+        'placeholder' => env('EVENTPULSE_PHONE_PLACEHOLDER', '+243 81 234 5678'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Paiement simulé (démonstration — aucun prélèvement réel)
+    |--------------------------------------------------------------------------
+    */
+
+    'payment_simulation' => filter_var(
+        env('EVENTPULSE_PAYMENT_SIMULATION', true),
+        FILTER_VALIDATE_BOOL
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Modération des organisateurs à l'inscription
+    |--------------------------------------------------------------------------
+    */
+
+    'organizer_moderation' => filter_var(
+        env('EVENTPULSE_ORGANIZER_MODERATION', true),
+        FILTER_VALIDATE_BOOL
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Secret HMAC pour webhooks Mobile Money
+    |--------------------------------------------------------------------------
+    */
+
+    'webhook_secret' => env('EVENTPULSE_WEBHOOK_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Token pour déclencher schedule:run via URL (tâche planifiée AlwaysData)
+    |--------------------------------------------------------------------------
+    */
+
+    'cron_token' => env('EVENTPULSE_CRON_TOKEN'),
+
 ];

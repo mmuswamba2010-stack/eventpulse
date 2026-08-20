@@ -75,4 +75,21 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+function bindThemeToggle() {
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        if (button.dataset.epThemeBound === 'true') {
+            return;
+        }
+
+        button.dataset.epThemeBound = 'true';
+
+        button.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', bindThemeToggle);
+
 Alpine.start();

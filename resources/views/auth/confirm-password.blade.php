@@ -1,16 +1,15 @@
 <x-guest-layout>
     <div class="mb-7">
-        <p class="ep-kicker mb-2">Confirmation</p>
-        <h1 class="font-display text-xl font-bold text-ink">Confirmez votre identité</h1>
-        <p class="mt-1.5 text-sm text-ink-muted">Saisissez votre mot de passe pour continuer.</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-coral mb-2">{{ __('Confirmation') }}</p>
+        <h1 class="font-display text-xl font-bold text-charcoal dark:text-[#FAFAFA]">{{ __('Confirm your identity') }}</h1>
+        <p class="mt-1.5 text-sm text-frost">{{ __('Enter your password to continue.') }}</p>
     </div>
 
     <form method="POST" action="{{ route('password.confirm') }}" class="space-y-5">
         @csrf
 
-        <!-- Password -->
         <div>
-            <x-input-label for="password" value="Mot de passe" />
+            <x-input-label for="password" :value="__('Password')" />
             <x-password-input id="password" class="block mt-1.5 w-full"
                             name="password"
                             required autocomplete="current-password" autofocus />
@@ -18,7 +17,7 @@
         </div>
 
         <x-primary-button class="w-full py-3">
-            Confirmer
+            {{ __('Confirm') }}
         </x-primary-button>
     </form>
 </x-guest-layout>

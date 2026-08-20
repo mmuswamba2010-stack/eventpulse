@@ -34,6 +34,21 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertSame(1, NewsletterSubscriber::count());
     }
 
+    public function test_un_desinscrit_peut_se_reinscrire(): void
+    {
+        NewsletterSubscriber::create([
+            'email' => 'fan@example.com',
+            'unsubscribed_at' => now(),
+        ]);
+
+        $this->from('/')
+            ->post(route('newsletter.subscribe'), ['email' => 'fan@example.com'])
+            ->assertRedirect(route('events.index').'#about')
+            ->assertSessionHas('newsletter_success');
+
+        $this->assertNull(NewsletterSubscriber::first()->unsubscribed_at);
+    }
+
     public function test_l_email_est_obligatoire_et_valide(): void
     {
         $this->post(route('newsletter.subscribe'), [])

@@ -30,11 +30,16 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:5,1')
         ->name('password.email');
 
+    Route::view('reset-password/success', 'auth.password-reset-success')
+        ->name('password.reset.success');
+
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    Route::post('reset-password/{token}', [NewPasswordController::class, 'store']);
 });
 
 Route::middleware('auth')->group(function () {

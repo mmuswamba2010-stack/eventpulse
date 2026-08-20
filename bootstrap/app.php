@@ -15,10 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\SetLocale::class,
         ]);
 
         $middleware->alias([
             'organizer' => \App\Http\Middleware\EnsureUserIsOrganizer::class,
+            'organizer.approved' => \App\Http\Middleware\EnsureOrganizerIsApproved::class,
+            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'webhook.mm' => \App\Http\Middleware\VerifyMobileMoneyWebhook::class,
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/mobile-money',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -139,7 +139,7 @@
                         @else
                             @auth
                                 @if ($alreadyBooked)
-                                    <div class="flex items-center gap-2 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 p-3 text-sm mb-3">
+                                    <div class="flex items-center gap-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 p-3 text-sm mb-3">
                                         <x-icon name="ticket" class="w-4 h-4 shrink-0" />
                                         <span>
                                             @if ($isFreeEvent)
@@ -150,9 +150,10 @@
                                             <a href="{{ route('tickets.index') }}" class="underline font-semibold">Voir mes billets</a>
                                         </span>
                                     </div>
-                                @endif
+                                @else
+                                @include('partials.payment-simulation-notice')
 
-                                <form method="POST" action="{{ route('tickets.store', $event) }}" class="space-y-3">
+                                <form method="POST" action="{{ route('tickets.store', $event) }}" class="space-y-3 mt-3">
                                     @csrf
 
                                     <div>
@@ -247,47 +248,23 @@
                                         <div>
                                             <x-input-label for="phone_number" value="Votre numéro (confirmation)" class="text-xs" />
                                             <x-text-input id="phone_number" name="phone_number" type="tel" class="mt-1 block w-full py-2 text-sm"
-                                                :value="old('phone_number', auth()->user()?->phone)" placeholder="06 12 34 56 78" />
+                                                :value="old('phone_number', auth()->user()?->phone)" placeholder="{{ config('eventpulse.phone.placeholder') }}" />
                                             <x-input-error :messages="$errors->get('phone_number')" class="mt-1" />
                                         </div>
                                     </div>
 
-                                    <div x-show="payMethod === 'card' && requiresPayment" x-cloak class="rounded-xl border border-charcoal/[0.08] bg-white p-3 space-y-2.5 mt-3">
+                                    <div x-show="payMethod === 'card' && requiresPayment" x-cloak class="rounded-xl border border-charcoal/[0.08] dark:border-white/10 bg-white dark:bg-[#141414] p-3 space-y-2.5 mt-3">
                                         @if ($organizer->bank_account_number)
-                                            <div class="rounded-lg bg-cream px-3 py-2.5 text-sm">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-coral">Coordonnées bancaires de l'organisateur</p>
-                                                <p class="font-semibold text-charcoal">{{ $organizer->bank_account_holder ?: $organizer->name }}</p>
+                                            <div class="rounded-lg bg-cream dark:bg-[#1A1A1A] px-3 py-2.5 text-sm">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-coral">Virement bancaire — coordonnées de l'organisateur</p>
+                                                <p class="font-semibold text-charcoal dark:text-[#FAFAFA]">{{ $organizer->bank_account_holder ?: $organizer->name }}</p>
                                                 <p class="mt-0.5 text-xs text-frost">{{ $organizer->bank_name }}</p>
-                                                <p class="mt-0.5 font-mono text-sm text-charcoal">{{ $organizer->bank_account_number }}</p>
+                                                <p class="mt-0.5 font-mono text-sm text-charcoal dark:text-[#FAFAFA]">{{ $organizer->bank_account_number }}</p>
                                             </div>
+                                            <p class="text-xs text-frost">Effectuez le virement puis confirmez la réservation. L'organisateur validera votre paiement.</p>
                                         @else
-                                            <p class="text-xs text-frost">L'organisateur n'a pas encore renseigné ses coordonnées bancaires.</p>
+                                            <p class="text-xs text-frost">L'organisateur n'a pas encore renseigné ses coordonnées bancaires. Contactez-le avant de réserver.</p>
                                         @endif
-
-                                        <div>
-                                            <x-input-label for="card_name" value="Titulaire" class="text-xs" />
-                                            <x-text-input id="card_name" name="card_name" type="text" class="mt-1 block w-full py-2 text-sm"
-                                                :value="old('card_name')" placeholder="Nom sur la carte" />
-                                            <x-input-error :messages="$errors->get('card_name')" class="mt-1" />
-                                        </div>
-                                        <div>
-                                            <x-input-label for="card_number" value="Numéro de carte" class="text-xs" />
-                                            <x-text-input id="card_number" name="card_number" type="text" class="mt-1 block w-full py-2 text-sm"
-                                                value="" placeholder="4242 4242 4242 4242" maxlength="23" autocomplete="off" />
-                                            <x-input-error :messages="$errors->get('card_number')" class="mt-1" />
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <x-input-label for="card_expiry" value="Date d'expiration" class="text-xs" />
-                                                <x-text-input id="card_expiry" name="card_expiry" type="text" class="mt-1 block w-full py-2 text-sm"
-                                                    :value="old('card_expiry')" placeholder="MM/AA" maxlength="7" />
-                                            </div>
-                                            <div>
-                                                <x-input-label for="card_cvc" value="Code CVC (3 chiffres)" class="text-xs" />
-                                                <x-text-input id="card_cvc" name="card_cvc" type="text" class="mt-1 block w-full py-2 text-sm"
-                                                    value="" placeholder="123" maxlength="4" autocomplete="off" />
-                                            </div>
-                                        </div>
                                     </div>
 
                                     <p x-show="payMethod === 'cash' && requiresPayment" x-cloak class="text-xs text-frost bg-cream rounded-lg px-3 py-2 mt-3">
@@ -303,8 +280,9 @@
                                         <x-icon name="ticket" class="w-4 h-4" />
                                         <span x-text="requiresPayment ? 'Réserver mon billet' : 'Réserver ma place'">Réserver</span>
                                     </button>
-                                    <p x-show="requiresPayment" x-cloak class="text-[10px] text-center text-frost">Paiement simulé — aucun prélèvement réel.</p>
+                                    <p x-show="requiresPayment" x-cloak class="text-[10px] text-center text-frost">Confirmation de réservation — paiement à valider avec l'organisateur.</p>
                                 </form>
+                                @endif
                             @else
                                 <a href="{{ route('login') }}"
                                    class="flex items-center justify-center gap-2 w-full bg-brand hover:bg-brand-700 text-white font-semibold rounded-xl px-4 py-3.5 text-sm transition">

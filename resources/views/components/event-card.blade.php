@@ -22,7 +22,7 @@
 
 <a href="{{ route('events.show', $event->slug) }}"
    {{ $attributes->class(['group ep-event-card flex flex-col no-underline']) }}>
-    <div class="relative h-44 bg-[#ECECEE] border-b border-charcoal/[0.06]">
+    <div class="relative h-44 bg-[#ECECEE] dark:bg-[#252525] border-b border-charcoal/[0.06] dark:border-white/10">
         @if ($event->image_path)
             <img src="{{ asset('storage/'.$event->image_path) }}" alt="{{ $event->title }}"
                  class="absolute inset-0 w-full h-full object-cover">
@@ -46,7 +46,7 @@
     </div>
 
     <div class="flex flex-1 flex-col p-5">
-        <h3 class="font-semibold text-[16px] leading-snug text-charcoal line-clamp-2">
+        <h3 class="font-semibold text-[16px] leading-snug text-charcoal dark:text-[#FAFAFA] line-clamp-2">
             {{ $event->title }}
         </h3>
 
@@ -65,11 +65,11 @@
             </li>
         </ul>
 
-        <div class="mt-4 pt-4 flex items-center justify-between gap-3 border-t border-charcoal/[0.06]">
+        <div class="mt-4 pt-4 flex items-center justify-between gap-3 border-t border-charcoal/[0.06] dark:border-white/10">
             @if ($start <= 0)
-                <span class="font-semibold text-base text-charcoal">Gratuit</span>
+                <span class="font-semibold text-base text-charcoal dark:text-[#FAFAFA]">Gratuit</span>
             @else
-                <span class="font-semibold text-base text-charcoal">
+                <span class="font-semibold text-base text-charcoal dark:text-[#FAFAFA]">
                     <x-money :amount="$start" />
                 </span>
             @endif

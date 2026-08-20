@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public static function publicationFee(): float
     {
@@ -240,7 +241,25 @@ class Event extends Model
 
     public function categoryLabel(): string
     {
-        return self::CATEGORIES[$this->category] ?? self::CATEGORIES['other'];
+        return self::categoryLabelFor($this->category ?? 'other');
+    }
+
+    public static function categoryLabelFor(string $key): string
+    {
+        if (! array_key_exists($key, self::CATEGORIES)) {
+            $key = 'other';
+        }
+
+        return __('Event category '.$key);
+    }
+
+    public static function paymentMethodLabelFor(string $key): string
+    {
+        if (! array_key_exists($key, self::PARTICIPANT_PAYMENT_METHODS)) {
+            return $key;
+        }
+
+        return __('Payment method '.$key);
     }
 
     public static function categoryKeys(): array

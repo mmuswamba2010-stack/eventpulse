@@ -45,6 +45,9 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'phone' => $request->phone,
+            'organizer_status' => $request->role === 'organizer'
+                ? (config('eventpulse.organizer_moderation', true) ? 'pending' : 'approved')
+                : null,
         ]);
 
         event(new Registered($user));
@@ -53,9 +56,17 @@ class RegisteredUserController extends Controller
 
         $welcome = $this->welcomeMessage($user);
 
-        if ($user->isOrganizer()) {
-            return redirect(route('organizer.dashboard', absolute: false))
+        if ($user->isAdmin()) {
+            return redirect(route('admin.dashboard', absolute: false))
                 ->with('success', $welcome);
+        }
+
+        if ($user->isOrganizer()) {
+            $route = $user->canAccessOrganizerSpace()
+                ? route('organizer.dashboard', absolute: false)
+                : route('organizer.pending', absolute: false);
+
+            return redirect($route)->with('success', $welcome);
         }
 
         return redirect(route('events.index', absolute: false))
@@ -67,9 +78,9 @@ class RegisteredUserController extends Controller
         $firstName = Str::before(trim($user->name), ' ') ?: $user->name;
 
         if ($user->isOrganizer()) {
-            return "Bienvenue, {$firstName} ! Votre espace organisateur est prêt — publiez votre premier événement.";
+            return __('Account created welcome organizer', ['name' => $firstName]);
         }
 
-        return "Bienvenue, {$firstName} ! Votre compte est prêt — découvrez les événements et réservez vos places.";
+        return __('Account created welcome participant', ['name' => $firstName]);
     }
 }

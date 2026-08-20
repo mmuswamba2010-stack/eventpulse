@@ -21,6 +21,15 @@ class NewsletterController extends Controller
 
         $subscriber = NewsletterSubscriber::firstOrCreate(['email' => $email]);
 
+        if ($subscriber->unsubscribed_at) {
+            $subscriber->update(['unsubscribed_at' => null]);
+
+            return redirect()
+                ->back()
+                ->withFragment('about')
+                ->with('newsletter_success', 'Réinscription confirmée ! Vous recevrez à nouveau nos prochains événements.');
+        }
+
         if (! $subscriber->wasRecentlyCreated) {
             return redirect()
                 ->back()

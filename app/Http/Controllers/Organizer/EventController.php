@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Services\MobileMoneyPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,9 @@ use Illuminate\View\View;
 
 class EventController extends Controller
 {
+    public function __construct(
+        private MobileMoneyPaymentService $payments,
+    ) {}
     public function index(Request $request): View
     {
         $events = $request->user()->events()
@@ -60,16 +64,16 @@ class EventController extends Controller
 
         if (Event::requiresPublicationPayment()) {
             return redirect()->route('organizer.events.pay', $event)
-                ->with('success', 'Événement créé ! Réglez les frais de publication pour le rendre visible au public.');
+                ->with('success', __('Event created pay to publish'));
         }
 
         return redirect()->route('organizer.events.index')
-            ->with('success', 'Événement créé et publié avec succès !');
+            ->with('success', __('Event created and published'));
     }
 
     public function edit(Request $request, Event $event): View
     {
-        abort_unless($event->user_id === $request->user()->id, 403);
+        $this->authorize('update', $event);
 
         $event->load('ticketTypes');
 
@@ -78,7 +82,7 @@ class EventController extends Controller
 
     public function update(Request $request, Event $event): RedirectResponse
     {
-        abort_unless($event->user_id === $request->user()->id, 403);
+        $this->authorize('update', $event);
 
         $data = $this->validated($request, forCreate: false, event: $event);
         $ticketTypes = $data['ticket_types'];
@@ -115,17 +119,17 @@ class EventController extends Controller
         });
 
         return redirect()->route('organizer.events.index')
-            ->with('success', 'Événement mis à jour avec succès !');
+            ->with('success', __('Event updated success'));
     }
 
     public function destroy(Request $request, Event $event): RedirectResponse
     {
-        abort_unless($event->user_id === $request->user()->id, 403);
+        $this->authorize('delete', $event);
 
         $soldTickets = $event->tickets()->where('status', '!=', 'cancelled')->count();
 
         if ($soldTickets > 0) {
-            return back()->with('error', "Impossible de supprimer : {$soldTickets} billet(s) déjà vendu(s). Annulez l'événement à la place.");
+            return back()->with('error', __('Event delete blocked sold', ['count' => $soldTickets]));
         }
 
         if ($event->image_path) {
@@ -135,21 +139,21 @@ class EventController extends Controller
         $event->delete();
 
         return redirect()->route('organizer.events.index')
-            ->with('success', 'Événement supprimé.');
+            ->with('success', __('Event deleted success'));
     }
 
     public function pay(Request $request, Event $event): View|RedirectResponse
     {
-        abort_unless($event->user_id === $request->user()->id, 403);
+        $this->authorize('pay', $event);
 
         if (! Event::requiresPublicationPayment()) {
             return redirect()->route('organizer.events.index')
-                ->with('info', 'Le paiement de publication n\'est pas requis pour le moment.');
+                ->with('info', __('Publication payment not required'));
         }
 
         if ($event->is_paid) {
             return redirect()->route('organizer.events.index')
-                ->with('info', 'Cet événement est déjà publié.');
+                ->with('info', __('Event already published paid'));
         }
 
         return view('organizer.events.pay', compact('event'));
@@ -157,37 +161,39 @@ class EventController extends Controller
 
     public function processPayment(Request $request, Event $event): RedirectResponse
     {
-        abort_unless($event->user_id === $request->user()->id, 403);
+        $this->authorize('pay', $event);
 
         if (! Event::requiresPublicationPayment()) {
             return redirect()->route('organizer.events.index')
-                ->with('info', 'Le paiement de publication n\'est pas requis pour le moment.');
+                ->with('info', __('Publication payment not required'));
         }
 
         if ($event->is_paid) {
             return redirect()->route('organizer.events.index')
-                ->with('info', 'Cet événement est déjà publié.');
+                ->with('info', __('Event already published paid'));
         }
 
         $request->validate([
             'payment_method' => ['required', 'in:mobile_money'],
             'mobile_provider' => ['required', 'in:mpesa,orange_money,airtel_money'],
             'phone_number' => ['required', 'string', 'min:8', 'max:20'],
-        ], [], [
-            'payment_method' => 'moyen de paiement',
-            'mobile_provider' => 'opérateur',
-            'phone_number' => 'numéro de téléphone',
         ]);
 
-        $event->update([
-            'is_paid' => true,
-            'status' => 'published',
-            'payment_method' => $request->input('payment_method'),
-            'paid_at' => now(),
-        ]);
+        $payment = $this->payments->initiatePublicationPayment(
+            $event,
+            $request->user(),
+            $request->string('mobile_provider')->toString(),
+            $request->string('phone_number')->toString(),
+        );
+
+        if ($payment->isPending()) {
+            return redirect()
+                ->route('payments.show', $payment)
+                ->with('info', __('Payment pending mobile money confirmation.'));
+        }
 
         return redirect()->route('organizer.events.index')
-            ->with('success', 'Paiement effectué avec succès ! Votre événement est désormais publié.');
+            ->with('success', __('Publication payment success'));
     }
 
     /**

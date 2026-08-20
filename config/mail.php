@@ -1,5 +1,13 @@
 <?php
 
+$mailer = env('MAIL_MAILER', 'log');
+
+if ($mailer === 'smtp'
+    && empty(env('MAIL_PASSWORD'))
+    && env('APP_ENV') !== 'production') {
+    $mailer = 'log';
+}
+
 return [
 
     /*
@@ -14,7 +22,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => $mailer,
 
     /*
     |--------------------------------------------------------------------------
@@ -67,7 +75,7 @@ return [
 
         'sendmail' => [
             'transport' => 'sendmail',
-            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -t -i'),
         ],
 
         'log' => [

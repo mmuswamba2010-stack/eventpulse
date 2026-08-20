@@ -28,11 +28,11 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('events.index', absolute: false));
-        $response->assertSessionHas('success', 'Bienvenue, Test ! Votre compte est prêt — découvrez les événements et réservez vos places.');
+        $response->assertSessionHas('success', __('Account created welcome participant', ['name' => 'Test']));
 
         $this->followRedirects($response)
             ->assertOk()
-            ->assertSee('Bienvenue, Test !', false);
+            ->assertSee('Test', false);
     }
 
     public function test_new_organizers_are_redirected_to_their_dashboard(): void
@@ -47,10 +47,10 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('organizer.dashboard', absolute: false));
-        $response->assertSessionHas('success', 'Bienvenue, Test ! Votre espace organisateur est prêt — publiez votre premier événement.');
+        $response->assertSessionHas('success', __('Account created welcome organizer', ['name' => 'Test']));
 
         $this->followRedirects($response)
             ->assertOk()
-            ->assertSee('Bienvenue, Test !', false);
+            ->assertSee('Test', false);
     }
 }

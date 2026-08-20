@@ -14,7 +14,7 @@
     @if ($variant === 'full')
         <span class="ep-logo-text notranslate" translate="no">
             <span class="{{ $onDark ? 'text-frost' : 'text-frost' }}">Event</span>
-            <span class="{{ $onDark ? 'text-white' : 'text-charcoal' }}"> Pulse</span>
+            <span class="{{ $onDark ? 'text-white' : 'text-charcoal dark:text-[#FAFAFA]' }}"> Pulse</span>
         </span>
     @endif
 </a>

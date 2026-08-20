@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="flex items-center gap-2 font-extrabold text-2xl text-slate-900 tracking-tight">
+        <h2 class="flex items-center gap-2 font-extrabold text-2xl text-charcoal dark:text-[#FAFAFA] tracking-tight">
             <x-icon name="camera" class="w-7 h-7 text-brand" />
-            Scanner de billets
+            {{ __('Scanner title') }}
         </h2>
-        <p class="mt-1 text-sm text-slate-500">Présentez le QR Code du billet devant la caméra pour valider l'entrée.</p>
+        <p class="mt-1 text-sm text-frost">{{ __('Scanner subtitle') }}</p>
     </x-slot>
 
     <div class="py-8 pb-16">
@@ -29,7 +29,7 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> En direct
                 </div>
             </div>
-            <p class="text-xs text-slate-400 text-center -mt-2">
+            <p class="text-xs text-frost text-center -mt-2">
                 Autorisez l'accès à la caméra, puis alignez le QR Code dans le cadre.
             </p>
 
@@ -45,15 +45,15 @@
             </div>
 
             <!-- Saisie manuelle -->
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-                <h3 class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+            <div class="ep-card shadow-sm p-6">
+                <h3 class="flex items-center gap-2 font-bold text-charcoal dark:text-[#FAFAFA] text-sm">
                     <x-icon name="identification" class="w-4 h-4 text-brand" /> Saisie manuelle du code
                 </h3>
                 <form id="manual-form" class="mt-3 flex gap-2">
                     <input type="text" id="manual-code" placeholder="Code du billet..."
-                           class="flex-1 border-slate-200 bg-slate-50/60 focus:bg-white focus:border-brand focus:ring-brand/40 rounded-xl shadow-sm text-sm placeholder:text-slate-400">
+                           class="flex-1 ep-input rounded-xl shadow-sm text-sm">
                     <button type="submit"
-                            class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl transition">
+                            class="px-5 py-2.5 bg-charcoal dark:bg-white/10 hover:bg-charcoal/90 dark:hover:bg-white/15 text-white text-sm font-semibold rounded-xl transition">
                         Vérifier
                     </button>
                 </form>
@@ -109,7 +109,7 @@
                 messageEl.textContent = message;
                 if (ticket) {
                     detailsEl.innerHTML =
-                        `<p class="text-slate-700"><strong>${escapeHtml(ticket.holder)}</strong> — ${escapeHtml(ticket.event)}<br>${escapeHtml(ticket.event_date)}</p>`;
+                        `<p class="text-charcoal dark:text-[#FAFAFA]"><strong>${escapeHtml(ticket.holder)}</strong> — ${escapeHtml(ticket.event)}<br>${escapeHtml(ticket.event_date)}</p>`;
                 } else {
                     detailsEl.textContent = '';
                 }

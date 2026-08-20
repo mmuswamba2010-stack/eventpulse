@@ -14,7 +14,7 @@ class EnsureUserIsOrganizer
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user() || ! $request->user()->isOrganizer()) {
-            abort(403, 'Accès réservé aux organisateurs.');
+            abort(403, __('Organizer access restricted'));
         }
 
         return $next($request);

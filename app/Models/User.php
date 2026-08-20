@@ -3,16 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +31,10 @@ class User extends Authenticatable
         'bank_account_holder',
         'bank_name',
         'bank_account_number',
+        'organizer_status',
+        'organizer_reviewed_at',
+        'organizer_moderation_note',
+        'suspended_at',
     ];
 
     /**
@@ -51,6 +57,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'organizer_reviewed_at' => 'datetime',
+            'suspended_at' => 'datetime',
         ];
     }
 
@@ -74,6 +82,36 @@ class User extends Authenticatable
         return $this->role === 'participant';
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isOrganizerApproved(): bool
+    {
+        return $this->organizer_status === 'approved' || $this->organizer_status === null;
+    }
+
+    public function needsOrganizerApproval(): bool
+    {
+        return $this->isOrganizer()
+            && config('eventpulse.organizer_moderation', true)
+            && $this->organizer_status === 'pending';
+    }
+
+    public function canAccessOrganizerSpace(): bool
+    {
+        return $this->isOrganizer()
+            && ! $this->isSuspended()
+            && $this->organizer_status !== 'rejected'
+            && ($this->isOrganizerApproved() || ! config('eventpulse.organizer_moderation', true));
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
     public function mobileMoneyProviderLabel(): ?string
     {
         if (! $this->mobile_money_provider) {
@@ -81,5 +119,10 @@ class User extends Authenticatable
         }
 
         return Ticket::MOBILE_PROVIDERS[$this->mobile_money_provider] ?? null;
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }
