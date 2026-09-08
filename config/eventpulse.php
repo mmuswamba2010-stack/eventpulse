@@ -63,15 +63,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Compte plateforme — frais de publication (Mobile Money)
+    | Plateforme — frais de publication (intégrateur à venir)
     |--------------------------------------------------------------------------
     */
 
     'platform' => [
         'name' => env('EVENTPULSE_PLATFORM_NAME', 'Event Pulse'),
-
-        'mobile_money_provider' => env('EVENTPULSE_MOBILE_PROVIDER', 'orange_money'),
-        'mobile_money_phone' => env('EVENTPULSE_MOBILE_PHONE'),
     ],
 
     /*
@@ -109,7 +106,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Secret HMAC pour webhooks Mobile Money
+    | Secret HMAC pour webhooks paiement (intégrateur)
     |--------------------------------------------------------------------------
     */
 

@@ -95,7 +95,7 @@
                                         <x-icon name="check-badge" class="w-3.5 h-3.5 shrink-0" />
                                         {{ __('Publication fee paid before') }}<x-money :amount="$event->publication_fee ?? \App\Models\Event::publicationFee()" primary="usd" :free="false" />{{ __('Publication fee paid after') }}
                                         @if ($event->payment_method)
-                                            · {{ $event->payment_method === 'card' ? __('Payment method card') : __('Payment method mobile_money') }}
+                                            · {{ $event->payment_method === 'card' ? __('Payment method card') : __('Payment method integrator') }}
                                         @endif
                                         @if ($event->paid_at)
                                             · {{ $event->paid_at->format('d/m/Y') }}

@@ -57,11 +57,6 @@
                     <div class="min-w-0">
                         <p class="text-xs text-frost font-medium uppercase tracking-wide">Organisé par</p>
                         <p class="font-display font-bold text-charcoal">{{ $event->user->name }}</p>
-                        @if ($event->user->phone && $event->user->mobile_money_provider && $event->acceptsPaymentMethod('mobile_money'))
-                            <p class="mt-1 text-xs text-frost">
-                                Mobile Money · {{ $event->user->mobileMoneyProviderLabel() }} · {{ $event->user->phone }}
-                            </p>
-                        @endif
                         @if ($event->user->bank_account_number && $event->acceptsPaymentMethod('card'))
                             <p class="mt-1 text-xs text-frost">
                                 Carte / virement · {{ $event->user->bank_name }} · {{ $event->user->bank_account_number }}
@@ -98,7 +93,7 @@
                             'saleStartsAt' => $t->sale_starts_at?->locale(app()->getLocale())->translatedFormat('d M Y · H\hi'),
                             'saleEndsAt' => $t->sale_ends_at?->locale(app()->getLocale())->translatedFormat('d M Y · H\hi'),
                         ])->values()),
-                        payMethod: @js(old('payment_method', $event->acceptedPaymentMethods()[0] ?? 'mobile_money')),
+                        payMethod: @js(old('payment_method', $event->acceptedPaymentMethods()[0] ?? 'card')),
                         get current() { return this.types.find(t => t.id == this.selected) || this.types[0]; },
                         get requiresPayment() {
                             return this.current && parseFloat(this.current.price) > 0;
@@ -290,16 +285,13 @@
                                     @endphp
                                     <div x-show="requiresPayment" x-cloak>
                                         <x-input-label value="Paiement" class="text-xs" />
-                                        <div class="mt-1 grid grid-cols-3 gap-1.5">
+                                        <div class="mt-1 grid grid-cols-2 gap-1.5">
                                             @foreach ($acceptedPayments as $method)
                                                 <label class="flex flex-col items-center gap-1 border rounded-lg px-1.5 py-2 cursor-pointer transition text-center"
                                                        x-bind:class="payMethod === '{{ $method }}' ? 'border-coral bg-coral-muted/40' : 'border-charcoal/[0.08]'">
                                                     <input type="radio" name="payment_method" value="{{ $method }}"
                                                            x-model="payMethod" class="sr-only">
-                                                    @if ($method === 'mobile_money')
-                                                        <x-icon name="device-phone-mobile" class="w-4 h-4 text-coral" />
-                                                        <span class="text-[10px] font-semibold text-charcoal leading-tight">Mobile</span>
-                                                    @elseif ($method === 'card')
+                                                    @if ($method === 'card')
                                                         <x-icon name="credit-card" class="w-4 h-4 text-coral" />
                                                         <span class="text-[10px] font-semibold text-charcoal leading-tight">Carte</span>
                                                     @else
@@ -310,40 +302,6 @@
                                             @endforeach
                                         </div>
                                         <x-input-error :messages="$errors->get('payment_method')" class="mt-1" />
-
-                                    <div x-show="payMethod === 'mobile_money' && requiresPayment" x-cloak class="rounded-xl border border-coral/20 bg-coral-muted/30 p-3 space-y-2.5 mt-3">
-                                        @if ($organizer->phone)
-                                            <div class="rounded-lg bg-white px-3 py-2.5 text-sm">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-coral">Envoyez le paiement à</p>
-                                                <p class="font-semibold text-charcoal">{{ $organizer->name }}</p>
-                                                <p class="mt-0.5 font-mono text-sm text-charcoal">
-                                                    @if ($organizer->mobileMoneyProviderLabel())
-                                                        {{ $organizer->mobileMoneyProviderLabel() }} ·
-                                                    @endif
-                                                    {{ $organizer->phone }}
-                                                </p>
-                                            </div>
-                                        @else
-                                            <p class="text-xs text-frost">L'organisateur n'a pas encore renseigné son numéro Mobile Money.</p>
-                                        @endif
-
-                                        <div>
-                                            <p class="text-[10px] font-semibold uppercase tracking-wide text-frost mb-1">Votre opérateur</p>
-                                            <div class="grid grid-cols-3 gap-1.5" data-mobile-providers>
-                                                <x-mobile-money-provider compact value="mpesa" label="M-Pesa" logo="mpesa.png" :selected="old('mobile_provider') === 'mpesa'" />
-                                                <x-mobile-money-provider compact value="orange_money" label="Orange Money" logo="orange-money.svg" :selected="old('mobile_provider', 'orange_money') === 'orange_money'" />
-                                                <x-mobile-money-provider compact value="airtel_money" label="Airtel Money" logo="airtel-money.svg" :selected="old('mobile_provider') === 'airtel_money'" />
-                                            </div>
-                                            <x-input-error :messages="$errors->get('mobile_provider')" class="mt-1" />
-                                        </div>
-
-                                        <div>
-                                            <x-input-label for="phone_number" value="Votre numéro (confirmation)" class="text-xs" />
-                                            <x-text-input id="phone_number" name="phone_number" type="tel" class="mt-1 block w-full py-2 text-sm"
-                                                :value="old('phone_number', auth()->user()?->phone)" placeholder="{{ config('eventpulse.phone.placeholder') }}" />
-                                            <x-input-error :messages="$errors->get('phone_number')" class="mt-1" />
-                                        </div>
-                                    </div>
 
                                     <div x-show="payMethod === 'card' && requiresPayment" x-cloak class="rounded-xl border border-charcoal/[0.08] dark:border-white/10 bg-white dark:bg-[#141414] p-3 space-y-2.5 mt-3">
                                         @if ($organizer->bank_account_number)

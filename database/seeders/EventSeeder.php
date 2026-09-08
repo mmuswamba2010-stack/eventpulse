@@ -79,7 +79,7 @@ class EventSeeder extends Seeder
                 'publication_fee' => Event::publicationFee(),
                 'paid_at' => null,
                 'placement_mode' => Event::PLACEMENT_STANDING,
-                'accepted_payment_methods' => $isFree ? [] : ($data['accepted_payment_methods'] ?? ['mobile_money', 'cash']),
+                'accepted_payment_methods' => $isFree ? [] : ($data['accepted_payment_methods'] ?? ['card', 'cash']),
                 'event_date' => $eventDate,
             ], $data)
         );

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use App\Services\MobileMoneyPaymentService;
+use App\Services\PublicationPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -29,7 +29,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function confirm(Request $request, Payment $payment, MobileMoneyPaymentService $payments): RedirectResponse
+    public function confirm(Request $request, Payment $payment, PublicationPaymentService $payments): RedirectResponse
     {
         if (! $payment->isPending()) {
             return back()->with('admin_error', __('Payment already processed'));
@@ -51,7 +51,7 @@ class PaymentController extends Controller
         return back()->with('admin_success', __('Payment confirmed admin', ['reference' => $payment->reference]));
     }
 
-    public function fail(Payment $payment, MobileMoneyPaymentService $payments): RedirectResponse
+    public function fail(Payment $payment, PublicationPaymentService $payments): RedirectResponse
     {
         if (! $payment->isPending()) {
             return back()->with('admin_error', __('Payment already processed'));

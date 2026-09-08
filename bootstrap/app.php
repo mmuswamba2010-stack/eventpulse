@@ -23,11 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'organizer.approved' => \App\Http\Middleware\EnsureOrganizerIsApproved::class,
             'organizer.terms' => \App\Http\Middleware\EnsureOrganizerTermsAccepted::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-            'webhook.mm' => \App\Http\Middleware\VerifyMobileMoneyWebhook::class,
-        ]);
-
-        $middleware->validateCsrfTokens(except: [
-            'webhooks/mobile-money',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

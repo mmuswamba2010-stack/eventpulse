@@ -46,15 +46,15 @@ final class VitrineEvents
             ],
             [
                 'title' => 'Concert Live — Nuit Rumba Kin',
-                'description' => "Soirée payante avec les meilleurs artistes rumba congolaise et afrobeat.\n\nScène live, sound system professionnel et espace VIP. Paiement par Mobile Money ou espèces à l'entrée après réservation en ligne.\n\nNe manquez pas l'événement musical de la saison à Kinshasa !",
+                'description' => "Soirée payante avec les meilleurs artistes rumba congolaise et afrobeat.\n\nScène live, sound system professionnel et espace VIP. Paiement par carte ou espèces à l'entrée après réservation en ligne.\n\nNe manquez pas l'événement musical de la saison à Kinshasa !",
                 'location' => 'Kinshasa — Bandalungwa, Stade Tata Raphaël',
                 'category' => 'music',
                 'days_from_now' => 25,
                 'hour' => 20,
                 'minute' => 0,
                 'placement_mode' => Event::PLACEMENT_STANDING,
-                'accepted_payment_methods' => ['mobile_money', 'cash'],
-                'payment_method' => 'mobile_money',
+                'accepted_payment_methods' => ['card', 'cash'],
+                'payment_method' => 'integrator',
                 'types' => [
                     ['name' => 'Standard', 'price' => 15000, 'quantity' => 500],
                     ['name' => 'VIP', 'price' => 35000, 'quantity' => 80],

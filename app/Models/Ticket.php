@@ -127,11 +127,6 @@ class Ticket extends Model
             return 'Non renseigné';
         }
 
-        if ($this->payment_method === 'mobile_money') {
-            return self::MOBILE_PROVIDERS[$this->mobile_provider]
-                ?? 'Mobile Money';
-        }
-
         return Event::PARTICIPANT_PAYMENT_METHODS[$this->payment_method]
             ?? $this->payment_method;
     }

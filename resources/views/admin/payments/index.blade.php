@@ -86,7 +86,7 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-frost">
-                                        {{ \App\Models\Ticket::MOBILE_PROVIDERS[$payment->provider] ?? $payment->provider }}
+                                        {{ $payment->provider ?: '—' }}
                                     </td>
                                     <td class="px-4 py-3 text-frost whitespace-nowrap">{{ $payment->created_at->format('d/m/Y H:i') }}</td>
                                     <td class="px-4 py-3">

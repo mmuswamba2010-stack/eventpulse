@@ -167,7 +167,7 @@
                             <x-icon name="shield-check" class="w-5 h-5" />
                         </span>
                         <p class="font-semibold text-charcoal dark:text-[#FAFAFA]">{{ __('Secure payment') }}</p>
-                        <p class="mt-1 text-sm text-frost leading-relaxed">{{ __('Mobile Money, card or cash.') }}</p>
+                        <p class="mt-1 text-sm text-frost leading-relaxed">{{ __('Card or cash.') }}</p>
                     </div>
                     <div class="text-center sm:text-left">
                         <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-coral-muted text-coral mb-3">

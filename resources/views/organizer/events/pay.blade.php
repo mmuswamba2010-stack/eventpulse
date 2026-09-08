@@ -21,7 +21,7 @@
                     {{ __('Publish event heading', ['title' => $event->title]) }}
                 </h1>
                 <p class="mt-3 text-slate-300 max-w-xl mx-auto">
-                    {{ __('Publication payment intro') }}
+                    {{ __('Publication payment intro integrator') }}
                 </p>
             </div>
 
@@ -70,79 +70,35 @@
                         <p class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
                             <x-money :amount="$event->publication_fee" primary="usd" :free="false" on-dark />
                         </p>
-                        <p class="mt-2 text-sm text-brand-100/90">{{ __('Publication fee once') }}</p>
+                        <p class="mt-2 text-sm text-brand-100/90">{{ __('Publication fee once integrator') }}</p>
                     </div>
                 </div>
 
-                @php
-                    $platform = config('eventpulse.platform');
-                    $platformMobileLabel = \App\Models\Ticket::MOBILE_PROVIDERS[$platform['mobile_money_provider'] ?? ''] ?? null;
-                @endphp
                 <div class="lg:col-span-3 ep-card rounded-3xl p-6 sm:p-8 shadow-2xl">
                     @include('partials.payment-simulation-notice')
+
+                    @unless (config('eventpulse.payment_simulation', true))
+                        <div class="rounded-2xl border border-brand/20 bg-brand-50/60 dark:bg-brand-950/40 dark:border-brand-700/50 px-4 py-4 text-sm mb-6">
+                            <p class="flex items-center gap-2 font-semibold text-charcoal dark:text-[#FAFAFA]">
+                                <x-icon name="credit-card" class="w-4 h-4 text-brand shrink-0" />
+                                {{ __('Publication integrator coming soon title') }}
+                            </p>
+                            <p class="mt-2 text-frost">{{ __('Publication integrator coming soon body') }}</p>
+                        </div>
+                    @endunless
+
                     <form method="POST" action="{{ route('organizer.events.pay.process', $event) }}" class="space-y-6 mt-4">
                         @csrf
-                        <input type="hidden" name="payment_method" value="mobile_money">
 
-                        <div>
-                            <h3 class="flex items-center gap-2 text-sm font-bold text-charcoal dark:text-[#FAFAFA] uppercase tracking-wide mb-4">
-                                <x-icon name="device-phone-mobile" class="w-4 h-4 text-brand" /> {{ __('Mobile money payment section') }}
+                        <div class="rounded-2xl border border-charcoal/10 dark:border-white/10 bg-charcoal/[0.03] dark:bg-white/5 px-4 py-4">
+                            <h3 class="flex items-center gap-2 text-sm font-bold text-charcoal dark:text-[#FAFAFA] uppercase tracking-wide">
+                                <x-icon name="credit-card" class="w-4 h-4 text-brand" /> {{ __('Publication payment section') }}
                             </h3>
-
-                            @if ($platform['mobile_money_phone'])
-                                <div class="rounded-2xl border border-brand/20 bg-brand-50/60 dark:bg-brand-950/40 dark:border-brand-700/50 px-4 py-3.5 text-sm mb-5">
-                                    <p class="text-[11px] font-bold uppercase tracking-wide text-brand dark:text-brand-200">{{ __('Send payment to') }}</p>
-                                    <p class="font-semibold text-charcoal dark:text-[#FAFAFA]">{{ $platform['name'] }}</p>
-                                    <p class="mt-0.5 font-mono text-charcoal dark:text-[#FAFAFA]">
-                                        @if ($platformMobileLabel)
-                                            {{ $platformMobileLabel }} ·
-                                        @endif
-                                        {{ $platform['mobile_money_phone'] }}
-                                    </p>
-                                    <p class="mt-2 text-sm font-semibold text-charcoal dark:text-[#FAFAFA]">
-                                        {{ __('Amount label') }}
-                                        <x-money :amount="$event->publication_fee" primary="usd" :free="false" class="ml-1" />
-                                    </p>
-                                </div>
-                            @else
-                                <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mb-5">
-                                    {{ __('Platform mobile not configured') }}
-                                </p>
-                            @endif
-
-                            <div>
-                                <x-input-label :value="__('Your operator')" />
-                                <div class="grid grid-cols-3 gap-2.5 mt-1.5" data-mobile-providers>
-                                    <x-mobile-money-provider
-                                        value="mpesa"
-                                        label="M-Pesa"
-                                        logo="mpesa.png"
-                                        :selected="old('mobile_provider') === 'mpesa'" />
-                                    <x-mobile-money-provider
-                                        value="orange_money"
-                                        label="Orange Money"
-                                        logo="orange-money.svg"
-                                        :selected="old('mobile_provider', 'orange_money') === 'orange_money'" />
-                                    <x-mobile-money-provider
-                                        value="airtel_money"
-                                        label="Airtel Money"
-                                        logo="airtel-money.svg"
-                                        :selected="old('mobile_provider') === 'airtel_money'" />
-                                </div>
-                                <x-input-error :messages="$errors->get('mobile_provider')" class="mt-2" />
-                            </div>
-
-                            <div class="mt-4">
-                                <x-input-label for="phone_number" :value="__('Your number (confirmation)')" />
-                                <div class="relative mt-1.5">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                                        <x-icon name="phone" class="w-4 h-4" />
-                                    </span>
-                                    <x-text-input id="phone_number" name="phone_number" type="tel" class="block w-full pl-10"
-                                        :value="old('phone_number', auth()->user()->phone)" placeholder="{{ config('eventpulse.phone.placeholder') }}" />
-                                </div>
-                                <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
-                            </div>
+                            <p class="mt-2 text-sm text-frost">{{ __('Publication payment integrator hint') }}</p>
+                            <p class="mt-3 text-sm font-semibold text-charcoal dark:text-[#FAFAFA]">
+                                {{ __('Amount label') }}
+                                <x-money :amount="$event->publication_fee" primary="usd" :free="false" class="ml-1" />
+                            </p>
                         </div>
 
                         <x-primary-button type="submit" class="w-full justify-center !py-3.5">
@@ -159,7 +115,7 @@
                         @else
                             <p class="flex items-center justify-center gap-1.5 text-xs text-frost text-center">
                                 <x-icon name="clock" class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                                {{ __('Payment real pending notice') }}
+                                {{ __('Payment real pending notice integrator') }}
                             </p>
                         @endif
                     </form>

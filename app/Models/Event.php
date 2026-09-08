@@ -61,7 +61,6 @@ class Event extends Model
 
     /** Modes de paiement proposables aux participants. */
     public const PARTICIPANT_PAYMENT_METHODS = [
-        'mobile_money' => 'Mobile Money',
         'card' => 'Carte bancaire',
         'cash' => 'Espèces',
     ];

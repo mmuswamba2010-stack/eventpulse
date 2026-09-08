@@ -33,12 +33,12 @@
             : \App\Models\Event::PLACEMENT_STANDING;
     }
     $seatedPlacementEnabled = \App\Models\Event::allowsSeatedPlacement();
-    $defaultMethods = old('accepted_payment_methods', $event?->accepted_payment_methods ?? ['mobile_money', 'card', 'cash']);
+    $defaultMethods = old('accepted_payment_methods', $event?->accepted_payment_methods ?? ['card', 'cash']);
     if (! is_array($defaultMethods)) {
-        $defaultMethods = ['mobile_money', 'card', 'cash'];
+        $defaultMethods = ['card', 'cash'];
     }
     if ($event && ! $event->isFreeEvent() && $defaultMethods === []) {
-        $defaultMethods = ['mobile_money', 'cash'];
+        $defaultMethods = ['card', 'cash'];
     }
 @endphp
 
@@ -74,7 +74,7 @@
         },
         ensurePaidMethods() {
             if (!this.isFreeEvent && this.methods.length === 0) {
-                this.methods = ['mobile_money', 'cash'];
+                this.methods = ['card', 'cash'];
             }
         },
         get isFreeEvent() {
@@ -310,7 +310,7 @@
             {{ __('Paid event payment required') }}
         </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
             @foreach (\App\Models\Event::PARTICIPANT_PAYMENT_METHODS as $key => $label)
                 <label class="flex flex-col items-center gap-1.5 border-2 rounded-2xl px-3 py-3.5 cursor-pointer transition text-center"
                        x-bind:class="toggles('{{ $key }}') ? 'border-brand bg-brand-50 ring-2 ring-brand/20' : 'border-charcoal/10 dark:border-white/10 hover:border-charcoal/20 dark:hover:border-white/20'">
@@ -319,9 +319,7 @@
                            x-bind:checked="toggles('{{ $key }}')"
                            @change="toggle('{{ $key }}')"
                            class="sr-only">
-                    @if ($key === 'mobile_money')
-                        <x-icon name="device-phone-mobile" class="w-5 h-5" x-bind:class="toggles('{{ $key }}') ? 'text-brand' : 'text-frost'" />
-                    @elseif ($key === 'card')
+                    @if ($key === 'card')
                         <x-icon name="credit-card" class="w-5 h-5" x-bind:class="toggles('{{ $key }}') ? 'text-brand' : 'text-frost'" />
                     @else
                         <x-icon name="banknotes" class="w-5 h-5" x-bind:class="toggles('{{ $key }}') ? 'text-brand' : 'text-frost'" />
@@ -331,31 +329,6 @@
             @endforeach
         </div>
         <x-input-error :messages="$errors->get('accepted_payment_methods')" class="mb-4" />
-
-        <div x-show="toggles('mobile_money')" x-cloak class="rounded-2xl border border-charcoal/10 dark:border-white/10 bg-charcoal/[0.03] dark:bg-white/5 p-4 mb-4 space-y-4">
-            <h4 class="flex items-center gap-2 text-xs font-bold text-charcoal dark:text-[#FAFAFA] uppercase tracking-wide">
-                <x-icon name="device-phone-mobile" class="w-4 h-4 text-brand" /> {{ __('Payment method mobile_money') }}
-            </h4>
-            <p class="text-xs text-frost -mt-2">{{ __('Mobile money participant hint') }}</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <x-input-label for="organizer_mobile_provider" :value="__('Operator label')" />
-                    <select id="organizer_mobile_provider" name="organizer_mobile_provider" class="mt-1.5 ep-input">
-                        <option value="">{{ __('Choose option') }}</option>
-                        @foreach (\App\Models\Ticket::MOBILE_PROVIDERS as $key => $label)
-                            <option value="{{ $key }}" @selected(old('organizer_mobile_provider', auth()->user()->mobile_money_provider) === $key)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <x-input-error :messages="$errors->get('organizer_mobile_provider')" class="mt-2" />
-                </div>
-                <div>
-                    <x-input-label for="organizer_phone" :value="__('Mobile money number organizer')" />
-                    <x-text-input id="organizer_phone" name="organizer_phone" type="tel" class="mt-1.5 block w-full"
-                        :value="old('organizer_phone', auth()->user()->phone)" placeholder="{{ config('eventpulse.phone.placeholder') }}" />
-                    <x-input-error :messages="$errors->get('organizer_phone')" class="mt-2" />
-                </div>
-            </div>
-        </div>
 
         <div x-show="toggles('card')" x-cloak class="rounded-2xl border border-charcoal/10 dark:border-white/10 bg-charcoal/[0.03] dark:bg-white/5 p-4 mb-4 space-y-4">
             <h4 class="flex items-center gap-2 text-xs font-bold text-charcoal dark:text-[#FAFAFA] uppercase tracking-wide">

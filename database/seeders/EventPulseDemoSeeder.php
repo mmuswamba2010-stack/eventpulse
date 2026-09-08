@@ -75,7 +75,7 @@ class EventPulseDemoSeeder extends Seeder
             'category' => 'music',
             'event_date' => now()->addDays(12)->setTime(20, 0),
             'placement_mode' => Event::PLACEMENT_STANDING,
-            'payment_method' => 'mobile_money',
+            'payment_method' => 'card',
         ], [
             ['name' => 'Standard', 'price' => 180, 'quantity' => 150],
             ['name' => 'VIP', 'price' => 350, 'quantity' => 50],
@@ -101,7 +101,7 @@ class EventPulseDemoSeeder extends Seeder
             'category' => 'music',
             'event_date' => now()->addDays(8)->setTime(22, 0),
             'placement_mode' => Event::PLACEMENT_STANDING,
-            'payment_method' => 'mobile_money',
+            'payment_method' => 'card',
         ], [
             ['name' => 'Debout', 'price' => 250, 'quantity' => 300],
             ['name' => 'VVIP', 'price' => 500, 'quantity' => 50],
@@ -126,7 +126,7 @@ class EventPulseDemoSeeder extends Seeder
             'category' => 'conference',
             'event_date' => now()->addDays(5)->setTime(19, 30),
             'placement_mode' => Event::PLACEMENT_SEATED,
-            'payment_method' => 'mobile_money',
+            'payment_method' => 'card',
         ], [
             ['name' => 'Orchestre', 'price' => 120, 'quantity' => 50],
             ['name' => 'Balcon', 'price' => 80, 'quantity' => 30],
@@ -205,7 +205,7 @@ class EventPulseDemoSeeder extends Seeder
                 'is_paid' => $paid,
                 'publication_fee' => Event::publicationFee(),
                 'paid_at' => $paid ? now()->subDays(rand(1, 8)) : null,
-                'accepted_payment_methods' => ['mobile_money', 'card', 'cash'],
+                'accepted_payment_methods' => ['card', 'cash'],
             ], $attributes)
         );
 

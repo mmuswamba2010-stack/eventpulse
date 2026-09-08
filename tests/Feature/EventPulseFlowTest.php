@@ -29,9 +29,7 @@ class EventPulseFlowTest extends TestCase
     private function paymentProfilePayload(): array
     {
         return [
-            'accepted_payment_methods' => ['mobile_money', 'card', 'cash'],
-            'organizer_phone' => '0612345678',
-            'organizer_mobile_provider' => 'orange_money',
+            'accepted_payment_methods' => ['card', 'cash'],
             'bank_account_holder' => 'Organisateur Test',
             'bank_name' => 'Attijariwafa Bank',
             'bank_account_number' => 'MA6412345678901234567890123',

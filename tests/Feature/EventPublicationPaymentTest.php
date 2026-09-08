@@ -20,7 +20,12 @@ class EventPublicationPaymentTest extends TestCase
 
     private function organizer(): User
     {
-        return User::factory()->create(['role' => 'organizer']);
+        return User::factory()->create([
+            'role' => 'organizer',
+            'organizer_status' => 'approved',
+            'organizer_terms_accepted_at' => now(),
+            'organizer_terms_version' => \App\Support\OrganizerTerms::version(),
+        ]);
     }
 
     /**
@@ -29,9 +34,7 @@ class EventPublicationPaymentTest extends TestCase
     private function paymentProfilePayload(): array
     {
         return [
-            'accepted_payment_methods' => ['mobile_money', 'card', 'cash'],
-            'organizer_phone' => '0612345678',
-            'organizer_mobile_provider' => 'orange_money',
+            'accepted_payment_methods' => ['card', 'cash'],
             'bank_account_holder' => 'Organisateur Test',
             'bank_name' => 'Attijariwafa Bank',
             'bank_account_number' => 'MA6412345678901234567890123',
@@ -98,12 +101,10 @@ class EventPublicationPaymentTest extends TestCase
             ->get(route('organizer.events.pay', $event))
             ->assertOk()
             ->assertSee($event->title)
-            ->assertSee('Mobile Money')
-            ->assertSee('Envoyez le paiement à')
-            ->assertSee('0699999999')
+            ->assertSee(__('Publication payment section'))
             ->assertSee(number_format($event->publication_fee, 0, ',', ' '))
             ->assertSee('FC')
-            ->assertDontSee('Carte bancaire');
+            ->assertDontSee('Mobile Money');
     }
 
     public function test_un_organisateur_ne_peut_pas_payer_l_evenement_d_un_autre(): void
@@ -116,46 +117,25 @@ class EventPublicationPaymentTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($other)
-            ->post(route('organizer.events.pay.process', $event), [
-                'payment_method' => 'mobile_money',
-                'mobile_provider' => 'orange_money',
-                'phone_number' => '0612345678',
-            ])
+            ->post(route('organizer.events.pay.process', $event))
             ->assertForbidden();
     }
 
-    public function test_le_paiement_par_mobile_money_publie_l_evenement(): void
+    public function test_le_paiement_de_publication_publie_l_evenement_en_mode_simulation(): void
     {
         $organizer = $this->organizer();
         $event = $this->draftEvent($organizer);
 
         $this->actingAs($organizer)
-            ->post(route('organizer.events.pay.process', $event), [
-                'payment_method' => 'mobile_money',
-                'mobile_provider' => 'orange_money',
-                'phone_number' => '0612345678',
-            ])
+            ->post(route('organizer.events.pay.process', $event))
             ->assertRedirect(route('organizer.events.index'));
 
         $event->refresh();
         $this->assertTrue($event->is_paid);
         $this->assertSame('published', $event->status);
+        $this->assertSame('integrator', $event->payment_method);
 
         $this->get('/')->assertOk()->assertSee($event->title);
-    }
-
-    public function test_le_paiement_echoue_sans_les_champs_requis(): void
-    {
-        $organizer = $this->organizer();
-        $event = $this->draftEvent($organizer);
-
-        $this->actingAs($organizer)
-            ->post(route('organizer.events.pay.process', $event), [
-                'payment_method' => 'mobile_money',
-            ])
-            ->assertSessionHasErrors(['mobile_provider', 'phone_number']);
-
-        $this->assertFalse($event->fresh()->is_paid);
     }
 
     public function test_un_evenement_deja_paye_redirige_hors_de_la_page_de_paiement(): void

@@ -14,7 +14,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TicketController;
-use App\Http\Controllers\Webhooks\MobileMoneyWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,9 +44,6 @@ Route::get('/newsletter/unsubscribe/{token}', [NewsletterUnsubscribeController::
 Route::post('/newsletter/unsubscribe/{token}', [NewsletterUnsubscribeController::class, 'destroy'])
     ->name('newsletter.unsubscribe.confirm');
 
-Route::post('/webhooks/mobile-money', MobileMoneyWebhookController::class)
-    ->middleware('webhook.mm')
-    ->name('webhooks.mobile-money');
 
 Route::get('/internal/cron/schedule/{token}', \App\Http\Controllers\Internal\CronScheduleController::class)
     ->name('internal.cron.schedule');

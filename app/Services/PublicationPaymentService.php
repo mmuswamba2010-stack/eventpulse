@@ -4,13 +4,12 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Payment;
-use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class MobileMoneyPaymentService
+class PublicationPaymentService
 {
-    public function initiatePublicationPayment(Event $event, User $user, string $provider, string $phone): Payment
+    public function initiatePublicationPayment(Event $event, User $user): Payment
     {
         $payment = Payment::create([
             'reference' => Payment::generateReference(),
@@ -18,8 +17,7 @@ class MobileMoneyPaymentService
             'payable_type' => Event::class,
             'payable_id' => $event->id,
             'user_id' => $user->id,
-            'provider' => $provider,
-            'phone' => $phone,
+            'provider' => 'integrator',
             'amount' => $event->publication_fee ?? Event::publicationFee(),
             'currency' => config('eventpulse.currency.code', 'CDF'),
             'status' => Payment::STATUS_PENDING,
@@ -27,41 +25,6 @@ class MobileMoneyPaymentService
                 'event_title' => $event->title,
             ],
         ]);
-
-        if ($this->shouldSimulate()) {
-            $this->confirm($payment, 'sim-'.uniqid());
-        }
-
-        return $payment->fresh();
-    }
-
-    /**
-     * @param  list<Ticket>  $tickets
-     */
-    public function initiateTicketPayment(array $tickets, User $user, string $provider, string $phone, float $amount): Payment
-    {
-        $event = $tickets[0]->event;
-
-        $payment = Payment::create([
-            'reference' => Payment::generateReference(),
-            'purpose' => Payment::PURPOSE_TICKET,
-            'payable_type' => Event::class,
-            'payable_id' => $event->id,
-            'user_id' => $user->id,
-            'provider' => $provider,
-            'phone' => $phone,
-            'amount' => $amount,
-            'currency' => config('eventpulse.currency.code', 'CDF'),
-            'status' => Payment::STATUS_PENDING,
-            'metadata' => [
-                'ticket_ids' => collect($tickets)->pluck('id')->all(),
-                'event_title' => $event->title,
-            ],
-        ]);
-
-        Ticket::query()
-            ->whereIn('id', collect($tickets)->pluck('id'))
-            ->update(['payment_id' => $payment->id]);
 
         if ($this->shouldSimulate()) {
             $this->confirm($payment, 'sim-'.uniqid());
@@ -97,10 +60,6 @@ class MobileMoneyPaymentService
                 $this->publishEvent($payment);
             }
 
-            if ($payment->purpose === Payment::PURPOSE_TICKET) {
-                $this->validateTickets($payment);
-            }
-
             return $payment->fresh();
         });
     }
@@ -117,13 +76,6 @@ class MobileMoneyPaymentService
                 'failure_reason' => $reason,
             ]),
         ]);
-
-        if ($payment->purpose === Payment::PURPOSE_TICKET) {
-            Ticket::query()
-                ->where('payment_id', $payment->id)
-                ->where('status', 'pending')
-                ->update(['status' => 'cancelled']);
-        }
 
         return $payment->fresh();
     }
@@ -149,16 +101,8 @@ class MobileMoneyPaymentService
         $event->update([
             'is_paid' => true,
             'status' => 'published',
-            'payment_method' => 'mobile_money',
+            'payment_method' => 'integrator',
             'paid_at' => now(),
         ]);
-    }
-
-    private function validateTickets(Payment $payment): void
-    {
-        Ticket::query()
-            ->where('payment_id', $payment->id)
-            ->where('status', 'pending')
-            ->update(['status' => 'valid']);
     }
 }

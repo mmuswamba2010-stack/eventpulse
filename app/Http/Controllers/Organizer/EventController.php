@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Services\MobileMoneyPaymentService;
+use App\Services\PublicationPaymentService;
 use App\Support\EventImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ use Illuminate\View\View;
 class EventController extends Controller
 {
     public function __construct(
-        private MobileMoneyPaymentService $payments,
+        private PublicationPaymentService $payments,
     ) {}
     public function index(Request $request): View
     {
@@ -170,23 +170,12 @@ class EventController extends Controller
                 ->with('info', __('Event already published paid'));
         }
 
-        $request->validate([
-            'payment_method' => ['required', 'in:mobile_money'],
-            'mobile_provider' => ['required', 'in:mpesa,orange_money,airtel_money'],
-            'phone_number' => ['required', 'string', 'min:8', 'max:20'],
-        ]);
-
-        $payment = $this->payments->initiatePublicationPayment(
-            $event,
-            $request->user(),
-            $request->string('mobile_provider')->toString(),
-            $request->string('phone_number')->toString(),
-        );
+        $payment = $this->payments->initiatePublicationPayment($event, $request->user());
 
         if ($payment->isPending()) {
             return redirect()
                 ->route('payments.show', $payment)
-                ->with('info', __('Payment pending mobile money confirmation.'));
+                ->with('info', __('Payment pending confirmation.'));
         }
 
         return redirect()->route('organizer.events.index')
@@ -234,15 +223,13 @@ class EventController extends Controller
             'ticket_types.*.sale_ends_at' => ['nullable', 'date'],
             'ticket_types.*.is_active' => ['nullable', 'boolean'],
             'image' => ['nullable', 'image', 'max:4096'],
-            'organizer_phone' => ['nullable', 'string', 'min:8', 'max:20'],
-            'organizer_mobile_provider' => ['nullable', 'in:mpesa,orange_money,airtel_money'],
             'bank_account_holder' => ['nullable', 'string', 'max:255'],
             'bank_name' => ['nullable', 'string', 'max:255'],
             'bank_account_number' => ['nullable', 'string', 'max:34'],
             'accepted_payment_methods' => $isFreeEvent
                 ? ['nullable', 'array']
                 : ['required', 'array', 'min:1'],
-            'accepted_payment_methods.*' => ['in:mobile_money,card,cash'],
+            'accepted_payment_methods.*' => ['in:card,cash'],
         ];
 
         if (! $forCreate) {
@@ -271,8 +258,6 @@ class EventController extends Controller
             'ticket_types.*.is_active' => 'vente active',
             'status' => 'statut',
             'image' => 'photo',
-            'organizer_phone' => 'numéro Mobile Money',
-            'organizer_mobile_provider' => 'opérateur Mobile Money',
             'bank_account_holder' => 'titulaire du compte',
             'bank_name' => 'banque',
             'bank_account_number' => 'RIB / IBAN',
@@ -352,16 +337,6 @@ class EventController extends Controller
             ]);
         }
 
-        if (in_array('mobile_money', $methods, true)) {
-            $request->validate([
-                'organizer_phone' => ['required', 'string', 'min:8', 'max:20'],
-                'organizer_mobile_provider' => ['required', 'in:mpesa,orange_money,airtel_money'],
-            ], [], [
-                'organizer_phone' => 'numéro Mobile Money',
-                'organizer_mobile_provider' => 'opérateur Mobile Money',
-            ]);
-        }
-
         if (in_array('card', $methods, true)) {
             $request->validate([
                 'bank_account_holder' => ['required', 'string', 'max:255'],
@@ -384,8 +359,6 @@ class EventController extends Controller
         }
 
         $request->user()->update([
-            'phone' => $request->input('organizer_phone') ?: $request->user()->phone,
-            'mobile_money_provider' => $request->input('organizer_mobile_provider') ?: $request->user()->mobile_money_provider,
             'bank_account_holder' => $request->input('bank_account_holder') ?: $request->user()->bank_account_holder,
             'bank_name' => $request->input('bank_name') ?: $request->user()->bank_name,
             'bank_account_number' => $request->input('bank_account_number') ?: $request->user()->bank_account_number,

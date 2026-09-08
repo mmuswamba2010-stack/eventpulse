@@ -33,8 +33,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="EVENTPULSE_PLATFORM_NAME" value="Event Pulse"/>
-        <env name="EVENTPULSE_MOBILE_PROVIDER" value="mpesa"/>
-        <env name="EVENTPULSE_MOBILE_PHONE" value="0699999999"/>
         <env name="EVENTPULSE_PUBLICATION_FEE" value="25000"/>
         <env name="EVENTPULSE_CURRENCY_SYMBOL" value="FC"/>
         <env name="EVENTPULSE_ORGANIZER_MODERATION" value="false"/>
