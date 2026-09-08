@@ -53,8 +53,10 @@
                             <x-icon name="banknotes" class="w-5 h-5" />
                         </span>
                     </div>
-                    <p class="text-3xl font-extrabold text-charcoal dark:text-[#FAFAFA] mt-4"><x-money :amount="$totalRevenue" /></p>
-                    <p class="text-sm text-frost mt-1">{{ __('Revenue with currency', ['currency' => \App\Support\Money::name()]) }}</p>
+                    <p class="text-3xl font-extrabold text-charcoal dark:text-[#FAFAFA] mt-4">
+                        <x-money :amount="$totalRevenue" />
+                    </p>
+                    <p class="text-sm text-frost mt-1">{{ __('Revenue dual label') }}</p>
                 </div>
             </div>
 

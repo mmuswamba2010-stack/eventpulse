@@ -4,6 +4,7 @@
     @php
         $tabs = [
             'dashboard' => ['label' => __('Dashboard'), 'route' => 'admin.dashboard'],
+            'payments' => ['label' => __('Admin payments nav'), 'route' => 'admin.payments.index', 'badge' => \App\Models\Payment::query()->where('status', \App\Models\Payment::STATUS_PENDING)->count()],
             'newsletter' => ['label' => __('Newsletter'), 'route' => 'admin.newsletter.index'],
             'organizers' => ['label' => __('Organizers'), 'route' => 'admin.organizers.index'],
             'participants' => ['label' => __('Participants'), 'route' => 'admin.participants.index'],

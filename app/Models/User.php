@@ -34,6 +34,8 @@ class User extends Authenticatable
         'organizer_status',
         'organizer_reviewed_at',
         'organizer_moderation_note',
+        'organizer_terms_accepted_at',
+        'organizer_terms_version',
         'suspended_at',
     ];
 
@@ -58,6 +60,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'organizer_reviewed_at' => 'datetime',
+            'organizer_terms_accepted_at' => 'datetime',
             'suspended_at' => 'datetime',
         ];
     }

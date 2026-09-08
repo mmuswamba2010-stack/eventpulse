@@ -24,8 +24,8 @@
    {{ $attributes->class(['group ep-event-card flex flex-col no-underline']) }}>
     <div class="relative h-44 bg-[#ECECEE] dark:bg-[#252525] border-b border-charcoal/[0.06] dark:border-white/10">
         @if ($event->image_path)
-            <img src="{{ asset('storage/'.$event->image_path) }}" alt="{{ $event->title }}"
-                 class="absolute inset-0 w-full h-full object-cover">
+            <x-event-image :event="$event" :alt="$event->title" variant="card"
+                           class="absolute inset-0 w-full h-full object-cover" width="640" height="352" />
         @else
             <div class="absolute inset-0 flex items-center justify-center {{ $placeholderTone }}">
                 <span class="font-display text-3xl font-bold text-charcoal/15 uppercase tracking-wider">
@@ -69,8 +69,8 @@
             @if ($start <= 0)
                 <span class="font-semibold text-base text-charcoal dark:text-[#FAFAFA]">Gratuit</span>
             @else
-                <span class="font-semibold text-base text-charcoal dark:text-[#FAFAFA]">
-                    <x-money :amount="$start" />
+                <span class="font-semibold text-base">
+                    <x-money :amount="$start" primary="usd" :free="false" />
                 </span>
             @endif
 

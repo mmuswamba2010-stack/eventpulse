@@ -10,7 +10,7 @@ const config = JSON.parse(readFileSync(join(__dirname, '..', '.vscode', 'sftp.js
 const secret = randomBytes(32).toString('hex');
 const pattern = 'EVENTPULSE_WEBHOOK_SECRET';
 const sed = `grep -q '^${pattern}=' .env && sed -i 's|^${pattern}=.*|${pattern}=${secret}|' .env || echo '${pattern}=${secret}' >> .env`;
-const moderation = `grep -q '^EVENTPULSE_ORGANIZER_MODERATION=' .env && sed -i 's|^EVENTPULSE_ORGANIZER_MODERATION=.*|EVENTPULSE_ORGANIZER_MODERATION=true|' .env || echo 'EVENTPULSE_ORGANIZER_MODERATION=true' >> .env`;
+const moderation = `grep -q '^EVENTPULSE_ORGANIZER_MODERATION=' .env && sed -i 's|^EVENTPULSE_ORGANIZER_MODERATION=.*|EVENTPULSE_ORGANIZER_MODERATION=false|' .env || echo 'EVENTPULSE_ORGANIZER_MODERATION=false' >> .env`;
 
 const command = `cd ~/www && ${sed} && ${moderation} && grep -E '^EVENTPULSE_(WEBHOOK_SECRET|ORGANIZER_MODERATION)=' .env`;
 

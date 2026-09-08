@@ -15,6 +15,18 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
+    Route::get('register/participant', [RegisteredUserController::class, 'createParticipant'])
+        ->name('register.participant');
+
+    Route::post('register/participant', [RegisteredUserController::class, 'storeParticipant'])
+        ->middleware('throttle:5,1');
+
+    Route::get('register/organizer', [RegisteredUserController::class, 'createOrganizer'])
+        ->name('register.organizer');
+
+    Route::post('register/organizer', [RegisteredUserController::class, 'storeOrganizer'])
+        ->middleware('throttle:5,1');
+
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:5,1');
 

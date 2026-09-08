@@ -15,7 +15,12 @@ class EventPulseFlowTest extends TestCase
 
     private function organizer(): User
     {
-        return User::factory()->create(['role' => 'organizer']);
+        return User::factory()->create([
+            'role' => 'organizer',
+            'organizer_status' => 'approved',
+            'organizer_terms_accepted_at' => now(),
+            'organizer_terms_version' => \App\Support\OrganizerTerms::version(),
+        ]);
     }
 
     /**

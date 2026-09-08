@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Organizer;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Services\MobileMoneyPaymentService;
+use App\Support\EventImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EventController extends Controller
@@ -52,7 +53,7 @@ class EventController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('events', 'public');
+            $data['image_path'] = EventImage::storeFromUpload($request->file('image'));
         }
 
         $event = DB::transaction(function () use ($data, $ticketTypes) {
@@ -107,10 +108,8 @@ class EventController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            if ($event->image_path) {
-                Storage::disk('public')->delete($event->image_path);
-            }
-            $data['image_path'] = $request->file('image')->store('events', 'public');
+            EventImage::delete($event->image_path);
+            $data['image_path'] = EventImage::storeFromUpload($request->file('image'));
         }
 
         DB::transaction(function () use ($event, $data, $ticketTypes) {
@@ -132,9 +131,7 @@ class EventController extends Controller
             return back()->with('error', __('Event delete blocked sold', ['count' => $soldTickets]));
         }
 
-        if ($event->image_path) {
-            Storage::disk('public')->delete($event->image_path);
-        }
+        EventImage::delete($event->image_path);
 
         $event->delete();
 
@@ -233,6 +230,9 @@ class EventController extends Controller
             'ticket_types.*.name' => ['nullable', 'string', 'max:100'],
             'ticket_types.*.price' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'ticket_types.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
+            'ticket_types.*.sale_starts_at' => ['nullable', 'date'],
+            'ticket_types.*.sale_ends_at' => ['nullable', 'date'],
+            'ticket_types.*.is_active' => ['nullable', 'boolean'],
             'image' => ['nullable', 'image', 'max:4096'],
             'organizer_phone' => ['nullable', 'string', 'min:8', 'max:20'],
             'organizer_mobile_provider' => ['nullable', 'in:mpesa,orange_money,airtel_money'],
@@ -266,6 +266,9 @@ class EventController extends Controller
             'ticket_types.*.name' => 'nom du pass',
             'ticket_types.*.price' => 'prix',
             'ticket_types.*.quantity' => 'quantité',
+            'ticket_types.*.sale_starts_at' => 'début de vente',
+            'ticket_types.*.sale_ends_at' => 'fin de vente',
+            'ticket_types.*.is_active' => 'vente active',
             'status' => 'statut',
             'image' => 'photo',
             'organizer_phone' => 'numéro Mobile Money',
@@ -296,6 +299,11 @@ class EventController extends Controller
             }
 
             $price = ($row['price'] ?? '') === '' ? 0.0 : (float) $row['price'];
+
+            if (\App\Support\Money::usdEnabled() && \App\Support\Money::cdfPerUsd() > 0) {
+                $price = \App\Support\Money::usdToCdf($price);
+            }
+
             $name = trim((string) ($row['name'] ?? ''));
 
             if ($name === '') {
@@ -304,10 +312,22 @@ class EventController extends Controller
 
             $quantity = ($row['quantity'] ?? '') === '' ? 100 : (int) $row['quantity'];
 
+            $saleStartsAt = filled($row['sale_starts_at'] ?? null) ? $row['sale_starts_at'] : null;
+            $saleEndsAt = filled($row['sale_ends_at'] ?? null) ? $row['sale_ends_at'] : null;
+
+            if ($saleStartsAt && $saleEndsAt && strtotime($saleEndsAt) < strtotime($saleStartsAt)) {
+                throw ValidationException::withMessages([
+                    'ticket_types' => __('Ticket sale end before start', ['name' => $name]),
+                ]);
+            }
+
             $normalized[] = array_merge($row, [
                 'name' => $name,
                 'price' => max(0, $price),
                 'quantity' => max(1, $quantity),
+                'sale_starts_at' => $saleStartsAt,
+                'sale_ends_at' => $saleEndsAt,
+                'is_active' => filter_var($row['is_active'] ?? true, FILTER_VALIDATE_BOOL),
             ]);
         }
 
@@ -386,6 +406,9 @@ class EventController extends Controller
                 'price' => $row['price'],
                 'quantity' => (int) $row['quantity'],
                 'is_seated' => $isSeated,
+                'sale_starts_at' => $row['sale_starts_at'] ?? null,
+                'sale_ends_at' => $row['sale_ends_at'] ?? null,
+                'is_active' => (bool) ($row['is_active'] ?? true),
             ];
 
             if (! empty($row['id'])) {

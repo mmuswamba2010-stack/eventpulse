@@ -35,7 +35,8 @@
                         <div class="ep-event-card hover:shadow-lg transition overflow-hidden flex flex-col">
                             <div class="relative h-36 bg-gradient-to-br bg-brand overflow-hidden">
                                 @if ($event->image_path)
-                                    <img src="{{ asset('storage/'.$event->image_path) }}" alt="{{ $event->title }}" class="w-full h-full object-cover">
+                                    <x-event-image :event="$event" :alt="$event->title" variant="thumb"
+                                                   class="w-full h-full object-cover" width="640" height="352" />
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <x-icon name="photo" class="w-10 h-10 text-white/50" />
@@ -75,8 +76,8 @@
                                 <div class="mt-3">
                                     <div class="flex items-center justify-between text-xs text-frost mb-1.5">
                                         <span>{{ __('Sold progress', ['sold' => $event->sold_count, 'capacity' => $event->capacity]) }}</span>
-                                        <span class="font-semibold text-charcoal dark:text-[#FAFAFA]">
-                                            <x-money :amount="$event->price" />
+                                        <span class="font-semibold">
+                                            <x-money :amount="$event->price" primary="usd" :free="false" />
                                         </span>
                                     </div>
                                     <div class="h-1.5 rounded-full bg-charcoal/[0.06] dark:bg-white/10 overflow-hidden">
@@ -92,7 +93,7 @@
                                 @elseif ($event->is_paid && \App\Models\Event::requiresPublicationPayment())
                                     <p class="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                                         <x-icon name="check-badge" class="w-3.5 h-3.5 shrink-0" />
-                                        {{ __('Publication fee paid before') }}<x-money :amount="$event->publication_fee ?? \App\Models\Event::publicationFee()" />{{ __('Publication fee paid after') }}
+                                        {{ __('Publication fee paid before') }}<x-money :amount="$event->publication_fee ?? \App\Models\Event::publicationFee()" primary="usd" :free="false" />{{ __('Publication fee paid after') }}
                                         @if ($event->payment_method)
                                             · {{ $event->payment_method === 'card' ? __('Payment method card') : __('Payment method mobile_money') }}
                                         @endif

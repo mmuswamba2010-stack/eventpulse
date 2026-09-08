@@ -1,4 +1,10 @@
-<x-app-layout>
+<x-app-layout
+    :seo-title="$seo['title']"
+    :seo-description="$seo['description']"
+    :seo-url="$seo['url']"
+    :seo-image="$seo['image']"
+    :seo-type="$seo['type']"
+>
     @php
         $filterParams = fn (?string $cat = null, ?string $whenVal = null) => array_filter([
             'search' => $search ?: null,

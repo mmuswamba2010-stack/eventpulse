@@ -4,72 +4,110 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\OrganizerTerms;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws ValidationException
-     */
-    public function store(Request $request): RedirectResponse
+    public function createParticipant(): View
+    {
+        return view('auth.register-participant');
+    }
+
+    public function createOrganizer(): View
+    {
+        return view('auth.register-organizer');
+    }
+
+    public function storeParticipant(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'in:organizer,participant'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'password' => ['required', 'string', 'min:8', 'max:255'],
         ]);
 
+        $user = $this->createUser($request, role: 'participant');
+
+        return $this->redirectAfterRegistration($user, defaultRoute: 'events.index');
+    }
+
+    public function storeOrganizer(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'string', 'min:8', 'max:255'],
+            'phone' => ['required', 'string', 'min:8', 'max:30'],
+            'accept_organizer_terms' => ['accepted'],
+        ], [], [
+            'accept_organizer_terms' => __('Organizer terms acceptance label'),
+        ]);
+
+        $user = $this->createUser($request, role: 'organizer', phone: $request->phone);
+
+        return $this->redirectAfterRegistration($user, defaultRoute: 'organizer.dashboard');
+    }
+
+    /**
+     * @deprecated Conservé pour compatibilité — préférer register.participant / register.organizer.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'role' => ['required', 'in:organizer,participant'],
+        ]);
+
+        return $request->role === 'organizer'
+            ? $this->storeOrganizer($request)
+            : $this->storeParticipant($request);
+    }
+
+    private function createUser(Request $request, string $role, ?string $phone = null): User
+    {
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'phone' => $request->phone,
-            'organizer_status' => $request->role === 'organizer'
+            'password' => $request->password,
+            'role' => $role,
+            'phone' => $phone,
+            'organizer_status' => $role === 'organizer'
                 ? (config('eventpulse.organizer_moderation', true) ? 'pending' : 'approved')
                 : null,
+            'organizer_terms_accepted_at' => $role === 'organizer' ? now() : null,
+            'organizer_terms_version' => $role === 'organizer' ? OrganizerTerms::version() : null,
         ]);
 
         event(new Registered($user));
-
         Auth::login($user);
 
-        $welcome = $this->welcomeMessage($user);
+        return $user;
+    }
 
-        if ($user->isAdmin()) {
-            return redirect(route('admin.dashboard', absolute: false))
-                ->with('success', $welcome);
-        }
+    private function redirectAfterRegistration(User $user, string $defaultRoute): RedirectResponse
+    {
+        $welcome = $this->welcomeMessage($user);
 
         if ($user->isOrganizer()) {
             $route = $user->canAccessOrganizerSpace()
                 ? route('organizer.dashboard', absolute: false)
                 : route('organizer.pending', absolute: false);
 
-            return redirect($route)->with('success', $welcome);
+            return redirect()->intended($route)->with('success', $welcome);
         }
 
-        return redirect(route('events.index', absolute: false))
+        return redirect()->intended(route($defaultRoute, absolute: false))
             ->with('success', $welcome);
     }
 

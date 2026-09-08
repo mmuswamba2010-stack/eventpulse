@@ -8,9 +8,15 @@
             </a>
 
             <div class="text-center mb-10">
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-brand-200 mb-4">
-                    <x-icon name="shield-check" class="w-3.5 h-3.5" /> {{ __('Secure payment simulation') }}
-                </span>
+                @if (config('eventpulse.payment_simulation', true))
+                    <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-400/20 border border-amber-300/40 text-sm font-semibold text-amber-100 mb-4">
+                        <x-icon name="shield-check" class="w-4 h-4" /> {{ __('Secure payment simulation') }}
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-sm font-semibold text-white mb-4 shadow-sm">
+                        <x-icon name="shield-check" class="w-4 h-4" /> {{ __('Secure payment') }}
+                    </span>
+                @endif
                 <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
                     {{ __('Publish event heading', ['title' => $event->title]) }}
                 </h1>
@@ -24,7 +30,8 @@
                     <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
                         <div class="relative h-32 bg-gradient-to-br bg-brand">
                             @if ($event->image_path)
-                                <img src="{{ asset('storage/'.$event->image_path) }}" alt="{{ $event->title }}" class="w-full h-full object-cover">
+                                <x-event-image :event="$event" :alt="$event->title" variant="thumb"
+                                               class="w-full h-full object-cover" width="640" height="352" />
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <x-icon name="photo" class="w-10 h-10 text-white/50" />
@@ -50,7 +57,7 @@
                                 </div>
                                 <div class="flex items-center gap-2.5 text-slate-300">
                                     <x-icon name="ticket" class="w-4 h-4 shrink-0 text-brand-200" />
-                                    <span><x-money :amount="$event->price" /> {{ __('Per ticket') }}</span>
+                                    <span><x-money :amount="$event->price" primary="usd" :free="false" on-dark /> {{ __('Per ticket') }}</span>
                                 </div>
                             </dl>
                         </div>
@@ -60,8 +67,8 @@
                         <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-brand-100">
                             <x-icon name="banknotes" class="w-4 h-4" /> {{ __('Publication fee label') }}
                         </p>
-                        <p class="mt-2 text-4xl font-extrabold tracking-tight">
-                            <x-money :amount="$event->publication_fee" />
+                        <p class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
+                            <x-money :amount="$event->publication_fee" primary="usd" :free="false" on-dark />
                         </p>
                         <p class="mt-2 text-sm text-brand-100/90">{{ __('Publication fee once') }}</p>
                     </div>
@@ -83,8 +90,8 @@
                             </h3>
 
                             @if ($platform['mobile_money_phone'])
-                                <div class="rounded-2xl border border-brand/20 bg-brand-50/60 px-4 py-3.5 text-sm mb-5">
-                                    <p class="text-[11px] font-bold uppercase tracking-wide text-brand">{{ __('Send payment to') }}</p>
+                                <div class="rounded-2xl border border-brand/20 bg-brand-50/60 dark:bg-brand-950/40 dark:border-brand-700/50 px-4 py-3.5 text-sm mb-5">
+                                    <p class="text-[11px] font-bold uppercase tracking-wide text-brand dark:text-brand-200">{{ __('Send payment to') }}</p>
                                     <p class="font-semibold text-charcoal dark:text-[#FAFAFA]">{{ $platform['name'] }}</p>
                                     <p class="mt-0.5 font-mono text-charcoal dark:text-[#FAFAFA]">
                                         @if ($platformMobileLabel)
@@ -92,7 +99,10 @@
                                         @endif
                                         {{ $platform['mobile_money_phone'] }}
                                     </p>
-                                    <p class="mt-1.5 text-xs text-frost">{{ __('Amount label') }} <x-money :amount="$event->publication_fee" /></p>
+                                    <p class="mt-2 text-sm font-semibold text-charcoal dark:text-[#FAFAFA]">
+                                        {{ __('Amount label') }}
+                                        <x-money :amount="$event->publication_fee" primary="usd" :free="false" class="ml-1" />
+                                    </p>
                                 </div>
                             @else
                                 <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mb-5">
@@ -137,13 +147,21 @@
 
                         <x-primary-button type="submit" class="w-full justify-center !py-3.5">
                             <x-icon name="lock-closed" class="w-4 h-4" />
-                            {{ __('Pay and publish fee') }} <x-money :amount="$event->publication_fee" :free="false" />
+                            {{ __('Pay and publish fee') }}
+                            <x-money :amount="$event->publication_fee" primary="usd" :free="false" on-dark class="ml-1" />
                         </x-primary-button>
 
-                        <p class="flex items-center justify-center gap-1.5 text-xs text-frost">
-                            <x-icon name="shield-check" class="w-3.5 h-3.5 text-emerald-500" />
-                            {{ __('Simulated transaction notice') }}
-                        </p>
+                        @if (config('eventpulse.payment_simulation', true))
+                            <p class="flex items-center justify-center gap-1.5 text-xs text-frost">
+                                <x-icon name="shield-check" class="w-3.5 h-3.5 text-amber-500" />
+                                {{ __('Simulated transaction notice') }}
+                            </p>
+                        @else
+                            <p class="flex items-center justify-center gap-1.5 text-xs text-frost text-center">
+                                <x-icon name="clock" class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                {{ __('Payment real pending notice') }}
+                            </p>
+                        @endif
                     </form>
                 </div>
             </div>

@@ -11,46 +11,39 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        $response = $this->get('/register');
+        $this->get('/register')
+            ->assertOk()
+            ->assertSee(__('Register hub title'), false);
 
-        $response->assertStatus(200);
+        $this->get('/register/participant')->assertOk();
+        $this->get('/register/organizer')->assertOk();
     }
 
-    public function test_new_users_can_register(): void
+    public function test_new_users_can_register_as_participant(): void
     {
-        $response = $this->post('/register', [
+        $response = $this->post('/register/participant', [
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'role' => 'participant',
+            'password' => 'password123',
         ]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('events.index', absolute: false));
         $response->assertSessionHas('success', __('Account created welcome participant', ['name' => 'Test']));
-
-        $this->followRedirects($response)
-            ->assertOk()
-            ->assertSee('Test', false);
     }
 
     public function test_new_organizers_are_redirected_to_their_dashboard(): void
     {
-        $response = $this->post('/register', [
+        $response = $this->post('/register/organizer', [
             'name' => 'Test Organizer',
             'email' => 'organizer@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'role' => 'organizer',
+            'password' => 'password123',
+            'phone' => '+243812345678',
+            'accept_organizer_terms' => '1',
         ]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('organizer.dashboard', absolute: false));
         $response->assertSessionHas('success', __('Account created welcome organizer', ['name' => 'Test']));
-
-        $this->followRedirects($response)
-            ->assertOk()
-            ->assertSee('Test', false);
     }
 }

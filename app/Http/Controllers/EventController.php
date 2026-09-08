@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Support\Seo;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -18,8 +19,9 @@ class EventController extends Controller
         $events = $this->publishedEvents($request);
         $featuredEvent = $this->featuredEvent();
         $categoryCounts = $this->categoryCounts();
+        $seo = Seo::forHome();
 
-        return view('events.index', compact('events', 'search', 'category', 'when', 'featuredEvent', 'categoryCounts'));
+        return view('events.index', compact('events', 'search', 'category', 'when', 'featuredEvent', 'categoryCounts', 'seo'));
     }
 
     public function grid(Request $request): View
@@ -44,7 +46,9 @@ class EventController extends Controller
             ? $event->tickets()->where('user_id', auth()->id())->where('status', '!=', 'cancelled')->exists()
             : false;
 
-        return view('events.show', compact('event', 'alreadyBooked'));
+        $seo = Seo::forEvent($event);
+
+        return view('events.show', compact('event', 'alreadyBooked', 'seo'));
     }
 
     /**

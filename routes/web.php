@@ -11,6 +11,8 @@ use App\Http\Controllers\Organizer\ScanController;
 use App\Http\Controllers\Organizer\SuspendedController;
 use App\Http\Controllers\PaymentStatusController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Webhooks\MobileMoneyWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -23,11 +25,20 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/grid', [EventController::class, 'grid'])->name('events.grid');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
 Route::post('/newsletter', [NewsletterController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('newsletter.subscribe');
 
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.switch');
+
+Route::get('/legal/organizer-terms', [\App\Http\Controllers\LegalController::class, 'organizerTerms'])
+    ->name('legal.organizer-terms');
+
+Route::post('/events/{event}/book', [TicketController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->name('tickets.store');
 
 Route::get('/newsletter/unsubscribe/{token}', [NewsletterUnsubscribeController::class, 'show'])
     ->name('newsletter.unsubscribe');
@@ -62,9 +73,6 @@ Route::get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::post('/events/{event}/book', [TicketController::class, 'store'])
-        ->middleware('throttle:20,1')
-        ->name('tickets.store');
     Route::get('/my-tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/my-tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
     Route::get('/my-tickets/{ticket}/download', [TicketController::class, 'downloadPdf'])->name('tickets.download');
@@ -84,7 +92,10 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::get('/pending', PendingController::class)->name('pending');
     Route::get('/suspended', SuspendedController::class)->name('suspended');
 
-    Route::middleware('organizer.approved')->group(function () {
+    Route::get('/terms', [\App\Http\Controllers\Organizer\TermsController::class, 'accept'])->name('terms.accept');
+    Route::post('/terms', [\App\Http\Controllers\Organizer\TermsController::class, 'store'])->name('terms.store');
+
+    Route::middleware(['organizer.approved', 'organizer.terms'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/events', [OrganizerEventController::class, 'index'])->name('events.index');
@@ -124,6 +135,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/organizers/{organizer}/unsuspend', [\App\Http\Controllers\Admin\OrganizerController::class, 'unsuspend'])->name('organizers.unsuspend');
     Route::delete('/organizers/{organizer}', [\App\Http\Controllers\Admin\OrganizerController::class, 'destroy'])->name('organizers.destroy');
     Route::get('/participants', [\App\Http\Controllers\Admin\ParticipantController::class, 'index'])->name('participants.index');
+    Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+    Route::patch('/payments/{payment}/confirm', [\App\Http\Controllers\Admin\PaymentController::class, 'confirm'])->name('payments.confirm');
+    Route::patch('/payments/{payment}/fail', [\App\Http\Controllers\Admin\PaymentController::class, 'fail'])->name('payments.fail');
 });
 
 require __DIR__.'/auth.php';

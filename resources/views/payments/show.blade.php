@@ -35,7 +35,11 @@
                     <div class="flex justify-between gap-4">
                         <dt class="text-frost">{{ __('Payment amount') }}</dt>
                         <dd class="font-semibold text-charcoal dark:text-[#FAFAFA]">
-                            <x-money :amount="$payment->amount" />
+                            @if ($payment->purpose === \App\Models\Payment::PURPOSE_PUBLICATION)
+                                <x-money :amount="$payment->amount" primary="usd" :free="false" />
+                            @else
+                                <x-money :amount="$payment->amount" />
+                            @endif
                         </dd>
                     </div>
                 </dl>

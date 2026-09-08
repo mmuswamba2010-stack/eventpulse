@@ -5,13 +5,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <meta name="description" content="Event Pulse — billetterie en ligne, QR Code et gestion d'événements.">
-
-        <title>{{ config('app.name', 'Event Pulse') }}</title>
+        @include('partials.seo-meta', [
+            'seoTitle' => $seoTitle ?? null,
+            'seoDescription' => $seoDescription ?? null,
+            'seoUrl' => $seoUrl ?? null,
+            'seoImage' => $seoImage ?? null,
+            'seoType' => $seoType ?? null,
+        ])
 
         <link rel="icon" href="{{ asset('images/brand/mark.svg') }}" type="image/svg+xml">
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=space-grotesk:500,600,700|inter:400,500,600,700&display=swap" rel="stylesheet" />
+        @include('partials.web-fonts')
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -58,7 +61,8 @@
                         <div>
                             <p class="text-sm font-semibold text-white mb-4">{{ __('Information') }}</p>
                             <ul class="space-y-2.5 text-sm text-white/60">
-                                <li><a href="{{ route('register') }}" class="hover:text-white no-underline transition">{{ __('Become an organizer') }}</a></li>
+                                <li><a href="{{ route('register.organizer') }}" class="hover:text-white no-underline transition">{{ __('Become an organizer') }}</a></li>
+                                <li><a href="{{ route('legal.organizer-terms') }}" class="hover:text-white no-underline transition">{{ __('Organizer terms title') }}</a></li>
                                 <li><a href="{{ route('events.index') }}#about" class="hover:text-white no-underline transition">{{ __('About') }}</a></li>
                                 <li><span class="text-white/40">Support 24/7</span></li>
                             </ul>

@@ -88,7 +88,8 @@
                     </x-dropdown>
                 @else
                     <a href="{{ route('login') }}" class="ep-btn-outline text-sm py-2 px-4">{{ __('Log in') }}</a>
-                    <a href="{{ route('register') }}" class="ep-btn text-sm py-2 px-4">{{ __('Sign up') }}</a>
+                    <a href="{{ route('events.index') }}#events" class="ep-btn text-sm py-2 px-4">{{ __('Book tickets') }}</a>
+                    <a href="{{ route('register.organizer') }}" class="hidden xl:inline-flex ep-btn-outline text-sm py-2 px-4 border-violet/30 text-violet hover:bg-violet-muted">{{ __('Organize') }}</a>
                 @endauth
             </div>
 
@@ -149,7 +150,7 @@
         @else
             <div class="pt-4 pb-4 border-t border-charcoal/5 dark:border-white/10 flex gap-2 px-4">
                 <a href="{{ route('login') }}" class="flex-1 ep-btn-outline text-center justify-center">{{ __('Log in') }}</a>
-                <a href="{{ route('register') }}" class="flex-1 ep-btn text-center justify-center">{{ __('Sign up') }}</a>
+                <a href="{{ route('events.index') }}#events" class="flex-1 ep-btn text-center justify-center">{{ __('Book tickets') }}</a>
             </div>
         @endauth
     </div>

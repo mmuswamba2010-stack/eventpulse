@@ -233,10 +233,40 @@ class Event extends Model
     public function startingPrice(): float
     {
         if ($this->relationLoaded('ticketTypes') && $this->ticketTypes->isNotEmpty()) {
+            $activeTypes = $this->ticketTypes->where('is_active', true);
+
+            if ($activeTypes->isNotEmpty()) {
+                return (float) $activeTypes->min('price');
+            }
+
             return (float) $this->ticketTypes->min('price');
         }
 
         return (float) $this->price;
+    }
+
+    /**
+     * Types de billets actuellement achetables sur la page publique.
+     *
+     * @return \Illuminate\Support\Collection<int, TicketType>
+     */
+    public function purchasableTicketTypes()
+    {
+        $types = $this->relationLoaded('ticketTypes')
+            ? $this->ticketTypes
+            : $this->ticketTypes()->get();
+
+        return $types->filter(fn (TicketType $type) => $type->isPurchasable())->values();
+    }
+
+    public function imageUrl(): ?string
+    {
+        return \App\Support\EventImage::url($this->image_path);
+    }
+
+    public function imageThumbUrl(): ?string
+    {
+        return \App\Support\EventImage::thumbUrl($this->image_path);
     }
 
     public function categoryLabel(): string

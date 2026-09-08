@@ -1,10 +1,13 @@
 <x-guest-layout>
     <div class="mb-7">
         <h1 class="font-display text-2xl font-bold text-charcoal dark:text-[#FAFAFA]">{{ __('Log in to Event Pulse') }}</h1>
-        <p class="mt-1.5 text-sm text-frost">{{ __('Access your tickets or organizer space.') }}</p>
+        <p class="mt-1.5 text-sm text-frost">{{ __('Login subtitle split') }}</p>
     </div>
 
     <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('info'))
+        <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">{{ session('info') }}</div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
@@ -50,9 +53,13 @@
             {{ __('Log in to Event Pulse') }} <x-icon name="arrow-right" class="w-4 h-4" />
         </x-primary-button>
 
-        <p class="text-center text-sm text-frost">
-            {{ __('Not registered yet?') }}
-            <a href="{{ route('register') }}" class="font-semibold text-brand hover:text-brand-700">{{ __('Sign up') }}</a>
-        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <a href="{{ route('register.participant') }}" class="ep-btn-outline text-sm py-2.5 justify-center no-underline">
+                {{ __('Register as participant') }}
+            </a>
+            <a href="{{ route('register.organizer') }}" class="ep-btn-outline text-sm py-2.5 justify-center no-underline">
+                {{ __('Register as organizer') }}
+            </a>
+        </div>
     </form>
 </x-guest-layout>

@@ -9,10 +9,22 @@
             'name' => $t->name,
             'price' => (string) $t->price,
             'quantity' => $t->quantity,
+            'is_active' => $t->is_active,
+            'sale_starts_at' => $t->sale_starts_at?->format('Y-m-d\TH:i') ?? '',
+            'sale_ends_at' => $t->sale_ends_at?->format('Y-m-d\TH:i') ?? '',
+            'sold' => $t->soldCount(),
         ])->values()->all();
+
+        if (\App\Support\Money::usdEnabled() && \App\Support\Money::cdfPerUsd() > 0) {
+            $oldTypes = array_map(function ($row) {
+                $row['price'] = (string) \App\Support\Money::cdfToUsd((float) ($row['price'] ?? 0));
+
+                return $row;
+            }, $oldTypes);
+        }
     }
     if (empty($oldTypes)) {
-        $oldTypes = [['id' => null, 'name' => $defaultPassName, 'price' => '0', 'quantity' => 100]];
+        $oldTypes = [['id' => null, 'name' => 'Standard', 'price' => '0', 'quantity' => 100, 'is_active' => true, 'sale_starts_at' => '', 'sale_ends_at' => '', 'sold' => 0]];
     }
     $currentPlacement = old('placement_mode', $event?->placement_mode ?? 'standing');
     if (! \App\Models\Event::allowsSeatedPlacement()) {
@@ -38,8 +50,15 @@
         defaultPassName: @js($defaultPassName),
         seatedHint: @js(__('Seated mode ticket hint')),
         standingHint: @js(__('Standing mode ticket hint')),
+        cdfPerUsd: @js(\App\Support\Money::usdEnabled() ? \App\Support\Money::cdfPerUsd() : 0),
+        fcSymbol: @js(\App\Support\Money::symbol()),
+        formatFc(usd) {
+            const value = Math.round(parseFloat(usd || 0) * this.cdfPerUsd);
+            if (value <= 0) return '';
+            return '≈ ' + value.toLocaleString('fr-FR') + ' ' + this.fcSymbol;
+        },
         addType() {
-            this.types.push({ id: null, name: this.defaultPassName, price: '0', quantity: 100 });
+            this.types.push({ id: null, name: '', price: '0', quantity: 100, is_active: true, sale_starts_at: '', sale_ends_at: '', sold: 0 });
         },
         removeType(index) {
             if (this.types.length > 1) this.types.splice(index, 1);
@@ -158,36 +177,62 @@
             </button>
         </div>
         <p class="text-xs text-frost mb-4">
-            {{ __('Ticket types default hint', ['symbol' => \App\Support\Money::symbol()]) }}
+            {{ __('Ticket types tiers hint') }}
         </p>
 
-        <div class="space-y-3">
+        <div class="space-y-4">
             <template x-for="(type, index) in types" :key="index">
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 rounded-2xl border border-charcoal/10 dark:border-white/10 bg-charcoal/[0.03] dark:bg-white/5">
-                    <input type="hidden" :name="'ticket_types['+index+'][id]'" :value="type.id || ''">
-                    <div class="sm:col-span-5">
-                        <label class="text-xs font-semibold text-frost">{{ __('Pass name') }}</label>
-                        <input type="text" :name="'ticket_types['+index+'][name]'" x-model="type.name"
-                               placeholder="{{ __('Pass name placeholder') }}"
-                               class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
+                <div class="rounded-2xl border border-charcoal/10 dark:border-white/10 bg-charcoal/[0.03] dark:bg-white/5 overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4">
+                        <input type="hidden" :name="'ticket_types['+index+'][id]'" :value="type.id || ''">
+                        <input type="hidden" :name="'ticket_types['+index+'][is_active]'" :value="type.is_active ? '1' : '0'">
+                        <div class="sm:col-span-4">
+                            <label class="text-xs font-semibold text-frost">{{ __('Pass name') }}</label>
+                            <input type="text" :name="'ticket_types['+index+'][name]'" x-model="type.name"
+                                   placeholder="{{ __('Pass name examples placeholder') }}"
+                                   class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="text-xs font-semibold text-frost">{{ __('Price label usd') }}</label>
+                            <input type="number" step="0.01" min="0" :name="'ticket_types['+index+'][price]'" x-model="type.price" required
+                                   placeholder="20"
+                                   class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
+                            <p x-show="cdfPerUsd > 0 && parseFloat(type.price) > 0" class="text-[10px] text-frost mt-0.5" x-text="formatFc(type.price)"></p>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="text-xs font-semibold text-frost">{{ __('Quantity label') }}</label>
+                            <input type="number" min="1" :name="'ticket_types['+index+'][quantity]'" x-model="type.quantity" required
+                                   class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
+                            <p x-show="type.sold > 0" class="text-[10px] text-frost mt-0.5" x-text="'{{ __('Tickets sold short') }}'.replace(':count', type.sold)"></p>
+                        </div>
+                        <div class="sm:col-span-3 flex items-end">
+                            <label class="inline-flex items-center gap-2 cursor-pointer rounded-xl border px-3 py-2.5 w-full transition"
+                                   x-bind:class="type.is_active ? 'border-emerald-200 bg-emerald-50/80 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300' : 'border-charcoal/10 text-frost'">
+                                <input type="checkbox" x-model="type.is_active" class="rounded border-charcoal/20 text-brand focus:ring-brand/30">
+                                <span class="text-xs font-semibold">{{ __('Ticket sale active toggle') }}</span>
+                            </label>
+                        </div>
+                        <div class="sm:col-span-1 flex items-end">
+                            <button type="button" @click="removeType(index)" x-show="types.length > 1"
+                                    class="w-full inline-flex items-center justify-center h-10 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition"
+                                    title="{{ __('Delete') }}">
+                                <x-icon name="x-mark" class="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
-                    <div class="sm:col-span-3">
-                        <label class="text-xs font-semibold text-frost">{{ __('Price label', ['symbol' => \App\Support\Money::symbol()]) }}</label>
-                        <input type="number" step="0.01" min="0" :name="'ticket_types['+index+'][price]'" x-model="type.price" required
-                               placeholder="0"
-                               class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
-                    </div>
-                    <div class="sm:col-span-3">
-                        <label class="text-xs font-semibold text-frost">{{ __('Quantity label') }}</label>
-                        <input type="number" min="1" :name="'ticket_types['+index+'][quantity]'" x-model="type.quantity" required
-                               class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
-                    </div>
-                    <div class="sm:col-span-1 flex items-end">
-                        <button type="button" @click="removeType(index)" x-show="types.length > 1"
-                                class="w-full inline-flex items-center justify-center h-10 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition"
-                                title="{{ __('Delete') }}">
-                            <x-icon name="x-mark" class="w-4 h-4" />
-                        </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 pb-4 pt-0 border-t border-charcoal/[0.06] dark:border-white/10">
+                        <div>
+                            <label class="text-xs font-semibold text-frost">{{ __('Ticket sale starts at') }}</label>
+                            <input type="datetime-local" :name="'ticket_types['+index+'][sale_starts_at]'" x-model="type.sale_starts_at"
+                                   class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
+                            <p class="text-[10px] text-frost mt-0.5">{{ __('Ticket sale starts hint') }}</p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-frost">{{ __('Ticket sale ends at') }}</label>
+                            <input type="datetime-local" :name="'ticket_types['+index+'][sale_ends_at]'" x-model="type.sale_ends_at"
+                                   class="mt-1 block w-full ep-input rounded-xl shadow-sm text-sm">
+                            <p class="text-[10px] text-frost mt-0.5">{{ __('Ticket sale ends hint') }}</p>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -246,7 +291,7 @@
                     {{ __('Event create draft before draft') }}
                     <strong>{{ __('Draft') }}</strong>.
                     {{ __('Event create draft before fee') }}
-                    (<strong><x-money :amount="\App\Models\Event::publicationFee()" /></strong>)
+                    (<strong><x-money :amount="\App\Models\Event::publicationFee()" primary="usd" :free="false" /></strong>)
                     {{ __('Event create draft after fee') }}
                 @else
                     {{ __('Event create publish before') }}
@@ -359,7 +404,9 @@
 
         @if ($event?->image_path)
             <div class="mb-3 flex items-center gap-3">
-                <img src="{{ asset('storage/'.$event->image_path) }}" alt="" class="h-16 w-24 rounded-xl object-cover border border-charcoal/10 dark:border-white/10">
+                <x-event-image :event="$event" alt="" variant="thumb"
+                               class="h-16 w-24 rounded-xl object-cover border border-charcoal/10 dark:border-white/10"
+                               width="96" height="64" />
                 <p class="text-xs text-frost">{{ __('Current image hint') }}</p>
             </div>
         @endif

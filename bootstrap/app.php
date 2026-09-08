@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'organizer' => \App\Http\Middleware\EnsureUserIsOrganizer::class,
             'organizer.approved' => \App\Http\Middleware\EnsureOrganizerIsApproved::class,
+            'organizer.terms' => \App\Http\Middleware\EnsureOrganizerTermsAccepted::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'webhook.mm' => \App\Http\Middleware\VerifyMobileMoneyWebhook::class,
         ]);

@@ -38,6 +38,7 @@
         <env name="EVENTPULSE_PUBLICATION_FEE" value="25000"/>
         <env name="EVENTPULSE_CURRENCY_SYMBOL" value="FC"/>
         <env name="EVENTPULSE_ORGANIZER_MODERATION" value="false"/>
+        <env name="EVENTPULSE_USD_ENABLED" value="false"/>
         <env name="EVENTPULSE_PAYMENT_SIMULATION" value="true"/>
         <env name="EVENTPULSE_WEBHOOK_SECRET" value="test-webhook-secret"/>
     </php>
