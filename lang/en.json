@@ -444,5 +444,16 @@
     "Guest checkout existing account": "An account already exists with this email. Log in to continue.",
     "Guest checkout login hint": "Log in with this email to complete your booking:",
     "Guest checkout account created": "Account created automatically. Keep this email — use Forgot password to set a password if needed.",
-    "Already have account": "Already have an account?"
+    "Already have account": "Already have an account?",
+    "Or continue with": "Or continue with",
+    "Continue with Google": "Continue with Google",
+    "Continue with Facebook": "Continue with Facebook",
+    "Social login unavailable": "Google/Facebook sign-in is not configured on this platform yet.",
+    "Social login failed": "Google/Facebook sign-in failed. Try again or use email and password.",
+    "Social login email required": "This Google/Facebook account did not share an email. Please sign up with email.",
+    "Social login email already participant": "This email is already a participant account. Log in or use participant sign-up.",
+    "Social login email already organizer": "This email is already an organizer account. Log in from the organizer space.",
+    "Register organizer complete title": "Complete your organizer account",
+    "Register organizer complete subtitle": "After Google or Facebook, add your phone number and accept the organizer terms.",
+    "Finish organizer account": "Finish sign-up"
 }

@@ -5,6 +5,9 @@
     </div>
 
     <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('error'))
+        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{{ session('error') }}</div>
+    @endif
     @if (session('info'))
         <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">{{ session('info') }}</div>
     @endif
@@ -52,6 +55,8 @@
         <x-primary-button class="w-full py-3">
             {{ __('Log in to Event Pulse') }} <x-icon name="arrow-right" class="w-4 h-4" />
         </x-primary-button>
+
+        @include('partials.social-auth-buttons', ['context' => 'login'])
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <a href="{{ route('register.participant') }}" class="ep-btn-outline text-sm py-2.5 justify-center no-underline">

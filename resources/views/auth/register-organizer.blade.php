@@ -7,6 +7,10 @@
         <p class="mt-1.5 text-sm text-frost">{{ __('Register organizer subtitle') }}</p>
     </div>
 
+    @if (session('error'))
+        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{{ session('error') }}</div>
+    @endif
+
     <form method="POST" action="{{ route('register.organizer') }}" class="space-y-4">
         @csrf
 
@@ -23,7 +27,7 @@
         </div>
 
         <div>
-            <x-input-label for="phone" :value="__('Mobile money number organizer')" />
+            <x-input-label for="phone" :value="__('Phone')" />
             <x-text-input id="phone" class="block mt-1.5 w-full" type="tel" name="phone" :value="old('phone')" required autocomplete="tel" placeholder="{{ config('eventpulse.phone.placeholder') }}" />
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
@@ -47,6 +51,8 @@
             {{ __('Create organizer account') }} <x-icon name="arrow-right" class="w-4 h-4" />
         </x-primary-button>
     </form>
+
+    @include('partials.social-auth-buttons', ['context' => 'organizer-register', 'class' => 'mt-5'])
 
     <p class="mt-5 text-center text-sm text-frost">
         {{ __('Participant instead') }}

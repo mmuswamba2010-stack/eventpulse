@@ -24,6 +24,14 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        if (empty(config('services.google.redirect'))) {
+            config(['services.google.redirect' => rtrim((string) config('app.url'), '/').'/auth/google/callback']);
+        }
+
+        if (empty(config('services.facebook.redirect'))) {
+            config(['services.facebook.redirect' => rtrim((string) config('app.url'), '/').'/auth/facebook/callback']);
+        }
+
         \Illuminate\Support\Facades\DB::prohibitDestructiveCommands(
             $this->app->isProduction()
         );

@@ -7,6 +7,10 @@
         <p class="mt-1.5 text-sm text-frost">{{ __('Register participant subtitle') }}</p>
     </div>
 
+    @if (session('error'))
+        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{{ session('error') }}</div>
+    @endif
+
     <form method="POST" action="{{ route('register.participant') }}" class="space-y-4">
         @csrf
 
@@ -33,6 +37,8 @@
             {{ __('Create participant account') }} <x-icon name="arrow-right" class="w-4 h-4" />
         </x-primary-button>
     </form>
+
+    @include('partials.social-auth-buttons', ['context' => 'participant-register', 'class' => 'mt-5'])
 
     <p class="mt-5 text-center text-sm text-frost">
         {{ __('Organizer instead') }}

@@ -27,6 +27,8 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'google_id',
+        'facebook_id',
         'mobile_money_provider',
         'bank_account_holder',
         'bank_name',

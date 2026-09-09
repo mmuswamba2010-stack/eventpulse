@@ -442,5 +442,16 @@
     "Guest checkout existing account": "Un compte existe déjà avec cet e-mail. Connectez-vous pour continuer.",
     "Guest checkout login hint": "Connectez-vous avec cet e-mail pour finaliser la réservation :",
     "Guest checkout account created": "Compte créé automatiquement. Conservez cet e-mail — utilisez « Mot de passe oublié » pour définir un mot de passe si besoin.",
-    "Already have account": "Déjà un compte ?"
+    "Already have account": "Déjà un compte ?",
+    "Or continue with": "Ou continuer avec",
+    "Continue with Google": "Continuer avec Google",
+    "Continue with Facebook": "Continuer avec Facebook",
+    "Social login unavailable": "La connexion Google/Facebook n'est pas encore configurée sur cette plateforme.",
+    "Social login failed": "Connexion Google/Facebook impossible. Réessayez ou utilisez e-mail et mot de passe.",
+    "Social login email required": "Ce compte Google/Facebook ne partage pas d'adresse e-mail. Utilisez l'inscription par e-mail.",
+    "Social login email already participant": "Cet e-mail est déjà un compte participant. Connectez-vous ou choisissez l'inscription participant.",
+    "Social login email already organizer": "Cet e-mail est déjà un compte organisateur. Connectez-vous depuis l'espace organisateur.",
+    "Register organizer complete title": "Finaliser votre compte organisateur",
+    "Register organizer complete subtitle": "Après Google ou Facebook, indiquez votre téléphone et acceptez les conditions organisateur.",
+    "Finish organizer account": "Terminer l'inscription"
 }
