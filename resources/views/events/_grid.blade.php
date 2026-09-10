@@ -2,13 +2,13 @@
     <div class="ep-card px-6 py-16 text-center" data-total="0">
         <img src="{{ asset('images/brand/mark.svg') }}" alt="" class="h-12 w-12 mx-auto mb-4 opacity-30">
         @if (! empty($search) || ! empty($category))
-            <p class="font-display text-lg font-semibold text-charcoal">Aucun événement trouvé</p>
-            <p class="text-sm text-frost mt-2">
+            <p class="font-display text-lg font-semibold text-charcoal dark:text-[#FAFAFA]">Aucun événement trouvé</p>
+            <p class="text-sm text-frost dark:text-slate-300 mt-2">
                 <a href="{{ route('events.index') }}" class="ep-btn-outline text-sm mt-4 no-underline">Voir tout le catalogue</a>
             </p>
         @else
-            <p class="font-display text-lg font-semibold text-charcoal">Rien pour l'instant</p>
-            <p class="text-sm text-frost mt-2">De nouveaux événements arrivent bientôt.</p>
+            <p class="font-display text-lg font-semibold text-charcoal dark:text-[#FAFAFA]">Rien pour l'instant</p>
+            <p class="text-sm text-frost dark:text-slate-300 mt-2">De nouveaux événements arrivent bientôt.</p>
         @endif
     </div>
 @else
