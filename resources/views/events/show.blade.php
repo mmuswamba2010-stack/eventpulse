@@ -67,54 +67,13 @@
             </div>
 
             {{-- Réservation --}}
+            @php
+                $purchasableTypes = $event->purchasableTicketTypes();
+                $isFreeEvent = $event->isFreeEvent();
+            @endphp
             <div class="lg:col-span-1">
-                @php
-                    $types = $event->ticketTypes->sortBy('price');
-                    $purchasableTypes = $event->purchasableTicketTypes();
-                    $minPrice = $types->where('is_active', true)->isNotEmpty()
-                        ? (float) $types->where('is_active', true)->min('price')
-                        : ($types->isNotEmpty() ? (float) $types->min('price') : (float) $event->price);
-                    $placementLabel = $event->isSeatedPlacement() ? 'Places assises numérotées' : 'Placement libre / Debout';
-                    $showPlacementBadge = \App\Models\Event::allowsSeatedPlacement() || $event->isSeatedPlacement();
-                    $isFreeEvent = $event->isFreeEvent();
-                    $defaultSelected = old('ticket_type_id', $purchasableTypes->first()?->id ?? $types->first()?->id);
-                @endphp
-                <div class="ep-card border-l-4 border-l-coral p-5 sm:p-6 space-y-4"
-                     x-data="{
-                        selected: @js($defaultSelected),
-                        types: @js($types->map(fn ($t) => [
-                            'id' => $t->id,
-                            'name' => $t->name,
-                            'price' => (float) $t->price,
-                            'remaining' => $t->remainingSeats(),
-                            'purchasable' => $t->isPurchasable(),
-                            'status' => $t->saleStatus(),
-                            'statusLabel' => $t->saleStatusLabel(),
-                            'saleStartsAt' => $t->sale_starts_at?->locale(app()->getLocale())->translatedFormat('d M Y · H\hi'),
-                            'saleEndsAt' => $t->sale_ends_at?->locale(app()->getLocale())->translatedFormat('d M Y · H\hi'),
-                        ])->values()),
-                        payMethod: @js(old('payment_method', $event->acceptedPaymentMethods()[0] ?? 'card')),
-                        get current() { return this.types.find(t => t.id == this.selected) || this.types[0]; },
-                        get requiresPayment() {
-                            return this.current && parseFloat(this.current.price) > 0;
-                        },
-                        get hasPurchasable() {
-                            return this.types.some(t => t.purchasable);
-                        }
-                     }">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-frost">À partir de</p>
-                        <p class="font-display text-2xl font-bold text-charcoal dark:text-[#FAFAFA]">
-                            <x-money :amount="$minPrice" primary="usd" :free="false" />
-                        </p>
-                        @if ($showPlacementBadge)
-                            <p class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-frost">
-                                <x-icon name="users" class="w-3.5 h-3.5" /> {{ $placementLabel }}
-                            </p>
-                        @endif
-                    </div>
-
-                    <div class="text-sm border-t border-charcoal/[0.06] pt-3">
+                <div class="ep-card border-l-4 border-l-coral p-5 sm:p-6 space-y-4">
+                    <div class="text-sm">
                         <p class="flex items-center gap-2 text-frost">
                             <x-icon name="users" class="w-4 h-4 shrink-0 text-coral" />
                             {{ $remaining }} / {{ $event->capacity }} places disponibles
@@ -125,223 +84,51 @@
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-charcoal/[0.06]">
-                        @if ($event->status === 'cancelled')
-                            <div class="flex items-center justify-center gap-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 p-4 text-sm font-semibold">
-                                <x-icon name="x-circle" class="w-5 h-5 shrink-0" /> Événement annulé
-                            </div>
-                        @elseif (! $event->isUpcoming())
-                            <div class="rounded-xl bg-slate-100 text-slate-500 p-4 text-sm text-center font-medium">
-                                Cet événement est terminé.
-                            </div>
-                        @elseif ($remaining <= 0)
-                            <div class="flex items-center justify-center gap-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 p-4 text-sm font-bold">
-                                Complet !
-                            </div>
-                        @elseif ($types->isEmpty())
-                            <div class="rounded-xl bg-amber-50 border border-amber-100 text-amber-800 p-4 text-sm text-center">
-                                Aucun type de billet n'est encore configuré pour cet événement.
-                            </div>
-                        @elseif ($purchasableTypes->isEmpty())
-                            <div class="rounded-xl bg-amber-50 border border-amber-100 text-amber-800 p-4 text-sm text-center">
-                                {{ __('No ticket types on sale now') }}
-                            </div>
-                            <div class="mt-3 space-y-2">
-                                @foreach ($types as $type)
-                                    <div class="flex items-center justify-between gap-2 rounded-lg border border-charcoal/[0.08] px-3 py-2 text-sm opacity-80">
-                                        <span class="font-medium">{{ $type->name }}</span>
-                                        <span class="text-xs font-semibold text-frost">{{ $type->saleStatusLabel() }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @elseif (auth()->check() && auth()->id() === $event->user_id)
-                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center space-y-3">
-                                <p class="text-sm text-slate-600">C'est votre événement — gérez-le depuis votre espace organisateur.</p>
-                                <a href="{{ route('organizer.events.index') }}"
-                                   class="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-ink text-white font-semibold px-4 py-3 text-sm hover:bg-slate-800 transition">
-                                    Gérer mes événements
-                                </a>
-                            </div>
-                        @else
-                            @if (auth()->check() && $alreadyBooked)
-                                    <div class="flex items-center gap-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 p-3 text-sm mb-3">
-                                        <x-icon name="ticket" class="w-4 h-4 shrink-0" />
-                                        <span>
-                                            @if ($isFreeEvent)
-                                                Vous avez déjà réservé votre place.
-                                            @else
-                                                Vous avez déjà des billets.
-                                            @endif
-                                            <a href="{{ route('tickets.index') }}" class="underline font-semibold">Voir mes billets</a>
-                                        </span>
-                                    </div>
-                            @else
-                                @guest
-                                    <p class="text-xs text-frost mb-3">{{ __('Guest checkout intro') }}</p>
-                                @endguest
-
-                                @include('partials.payment-simulation-notice')
-
-                                <form method="POST" action="{{ route('tickets.store', $event) }}" class="space-y-3 mt-3">
-                                    @csrf
-
-                                    @guest
-                                        <div class="rounded-xl border border-charcoal/[0.08] dark:border-white/10 bg-cream/50 dark:bg-[#141414] p-3 space-y-2.5">
-                                            <p class="text-[10px] font-bold uppercase tracking-wide text-frost">{{ __('Your contact details') }}</p>
-                                            <div>
-                                                <x-input-label for="guest_name" :value="__('Full name')" class="text-xs" />
-                                                <x-text-input id="guest_name" name="guest_name" type="text" class="mt-1 block w-full py-2 text-sm"
-                                                    :value="old('guest_name')" required autocomplete="name" />
-                                                <x-input-error :messages="$errors->get('guest_name')" class="mt-1" />
-                                            </div>
-                                            <div>
-                                                <x-input-label for="guest_email" :value="__('Email address')" class="text-xs" />
-                                                <x-text-input id="guest_email" name="guest_email" type="email" class="mt-1 block w-full py-2 text-sm"
-                                                    :value="old('guest_email')" required autocomplete="email" />
-                                                <x-input-error :messages="$errors->get('guest_email')" class="mt-1" />
-                                                @error('guest_email')
-                                                    <p class="mt-1 text-xs text-frost">
-                                                        {{ __('Guest checkout login hint') }}
-                                                        <a href="{{ route('login') }}" class="font-semibold text-brand hover:underline">{{ __('Log in') }}</a>
-                                                    </p>
-                                                @enderror
-                                            </div>
-                                            <div>
-                                                <x-input-label for="guest_phone" :value="__('Phone')" class="text-xs" />
-                                                <x-text-input id="guest_phone" name="guest_phone" type="tel" class="mt-1 block w-full py-2 text-sm"
-                                                    :value="old('guest_phone')" required autocomplete="tel" placeholder="{{ config('eventpulse.phone.placeholder') }}" />
-                                                <x-input-error :messages="$errors->get('guest_phone')" class="mt-1" />
-                                            </div>
-                                        </div>
-                                    @endguest
-
-                                    <div>
-                                        <x-input-label value="Type de billet" class="text-xs" />
-                                        <div class="mt-1 space-y-2">
-                                            @foreach ($types as $type)
-                                                @php
-                                                    $typeRemaining = $type->remainingSeats();
-                                                    $purchasable = $type->isPurchasable();
-                                                @endphp
-                                                <label class="block border rounded-xl px-3 py-3 transition text-sm
-                                                    {{ ! $purchasable ? 'opacity-60 border-charcoal/[0.06]' : 'cursor-pointer' }}"
-                                                       x-bind:class="selected == {{ $type->id }} && {{ $purchasable ? 'true' : 'false' }} ? 'border-coral bg-coral-muted/40' : 'border-charcoal/[0.08] hover:border-charcoal/20'">
-                                                    <span class="flex items-start justify-between gap-3">
-                                                        <span class="flex items-start gap-2 min-w-0">
-                                                            <input type="radio" name="ticket_type_id" value="{{ $type->id }}"
-                                                                   x-model.number="selected"
-                                                                   {{ ! $purchasable ? 'disabled' : '' }}
-                                                                   class="mt-0.5 text-coral focus:ring-coral">
-                                                            <span>
-                                                                <span class="font-semibold text-charcoal dark:text-[#FAFAFA] block">{{ $type->name }}</span>
-                                                                <span class="text-xs text-frost mt-0.5 block">
-                                                                    {{ __('Ticket remaining count', ['count' => $typeRemaining]) }}
-                                                                </span>
-                                                                @if ($type->sale_starts_at || $type->sale_ends_at)
-                                                                    <span class="text-[11px] text-frost mt-1 block">
-                                                                        @if ($type->sale_starts_at)
-                                                                            {{ __('Ticket sale from', ['date' => $type->sale_starts_at->locale(app()->getLocale())->translatedFormat('d M · H\hi')]) }}
-                                                                        @endif
-                                                                        @if ($type->sale_ends_at)
-                                                                            @if ($type->sale_starts_at) · @endif
-                                                                            {{ __('Ticket sale until', ['date' => $type->sale_ends_at->locale(app()->getLocale())->translatedFormat('d M · H\hi')]) }}
-                                                                        @endif
-                                                                    </span>
-                                                                @endif
-                                                            </span>
-                                                        </span>
-                                                        <span class="text-right shrink-0">
-                                                            <span class="font-semibold text-charcoal dark:text-[#FAFAFA] block">
-                                                                <x-money :amount="$type->price" primary="usd" :free="false" />
-                                                            </span>
-                                                            @unless ($purchasable)
-                                                                <span class="text-[10px] font-semibold uppercase tracking-wide text-frost mt-1 block">
-                                                                    {{ $type->saleStatusLabel() }}
-                                                                </span>
-                                                            @endunless
-                                                        </span>
-                                                    </span>
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                        <x-input-error :messages="$errors->get('ticket_type_id')" class="mt-1" />
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <x-input-label for="quantity" value="Quantité" class="text-xs" />
-                                            <select id="quantity" name="quantity" class="mt-1 block w-full ep-input py-2 text-sm">
-                                                @for ($i = 1; $i <= 10; $i++)
-                                                    <option value="{{ $i }}" @selected(old('quantity') == $i)>{{ $i }}</option>
-                                                @endfor
-                                            </select>
-                                            <x-input-error :messages="$errors->get('quantity')" class="mt-1" />
-                                        </div>
-                                    </div>
-
-                                    @php
-                                        $acceptedPayments = $event->acceptedPaymentMethods();
-                                        $organizer = $event->user;
-                                    @endphp
-                                    <div x-show="requiresPayment" x-cloak>
-                                        <x-input-label value="Paiement" class="text-xs" />
-                                        <div class="mt-1 grid grid-cols-2 gap-1.5">
-                                            @foreach ($acceptedPayments as $method)
-                                                <label class="flex flex-col items-center gap-1 border rounded-lg px-1.5 py-2 cursor-pointer transition text-center"
-                                                       x-bind:class="payMethod === '{{ $method }}' ? 'border-coral bg-coral-muted/40' : 'border-charcoal/[0.08]'">
-                                                    <input type="radio" name="payment_method" value="{{ $method }}"
-                                                           x-model="payMethod" class="sr-only">
-                                                    @if ($method === 'card')
-                                                        <x-icon name="credit-card" class="w-4 h-4 text-coral" />
-                                                        <span class="text-[10px] font-semibold text-charcoal leading-tight">Carte</span>
-                                                    @else
-                                                        <x-icon name="banknotes" class="w-4 h-4 text-coral" />
-                                                        <span class="text-[10px] font-semibold text-charcoal leading-tight">Espèces</span>
-                                                    @endif
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                        <x-input-error :messages="$errors->get('payment_method')" class="mt-1" />
-
-                                    <div x-show="payMethod === 'card' && requiresPayment" x-cloak class="rounded-xl border border-charcoal/[0.08] dark:border-white/10 bg-white dark:bg-[#141414] p-3 space-y-2.5 mt-3">
-                                        @if ($organizer->bank_account_number)
-                                            <div class="rounded-lg bg-cream dark:bg-[#1A1A1A] px-3 py-2.5 text-sm">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-coral">Virement bancaire — coordonnées de l'organisateur</p>
-                                                <p class="font-semibold text-charcoal dark:text-[#FAFAFA]">{{ $organizer->bank_account_holder ?: $organizer->name }}</p>
-                                                <p class="mt-0.5 text-xs text-frost">{{ $organizer->bank_name }}</p>
-                                                <p class="mt-0.5 font-mono text-sm text-charcoal dark:text-[#FAFAFA]">{{ $organizer->bank_account_number }}</p>
-                                            </div>
-                                            <p class="text-xs text-frost">Effectuez le virement puis confirmez la réservation. L'organisateur validera votre paiement.</p>
-                                        @else
-                                            <p class="text-xs text-frost">L'organisateur n'a pas encore renseigné ses coordonnées bancaires. Contactez-le avant de réserver.</p>
-                                        @endif
-                                    </div>
-
-                                    <p x-show="payMethod === 'cash' && requiresPayment" x-cloak class="text-xs text-frost bg-cream rounded-lg px-3 py-2 mt-3">
-                                        Règlement en espèces à l'entrée avec votre QR code.
-                                    </p>
-                                    </div>
-
-                                    <p x-show="!requiresPayment" x-cloak class="text-xs text-frost bg-cream rounded-lg px-3 py-2">
-                                        Entrée gratuite — aucun paiement requis.
-                                    </p>
-
-                                    <button type="submit" class="ep-btn w-full justify-center py-3">
-                                        <x-icon name="ticket" class="w-4 h-4" />
-                                        <span x-text="requiresPayment ? 'Réserver mon billet' : 'Réserver ma place'">Réserver</span>
-                                    </button>
-                                    <p x-show="requiresPayment" x-cloak class="text-[10px] text-center text-frost">Confirmation de réservation — paiement à valider avec l'organisateur.</p>
-
-                                    @guest
-                                        <p class="text-[11px] text-center text-frost">
-                                            {{ __('Already have account') }}
-                                            <a href="{{ route('login') }}" class="font-semibold text-brand hover:underline">{{ __('Log in') }}</a>
-                                        </p>
-                                    @endguest
-                                </form>
-                            @endif
-                        @endif
-                    </div>
+                    @if ($event->status === 'cancelled')
+                        <div class="flex items-center justify-center gap-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 p-4 text-sm font-semibold">
+                            <x-icon name="x-circle" class="w-5 h-5 shrink-0" /> Événement annulé
+                        </div>
+                    @elseif (! $event->isUpcoming())
+                        <div class="rounded-xl bg-slate-100 text-slate-500 p-4 text-sm text-center font-medium">
+                            Cet événement est terminé.
+                        </div>
+                    @elseif ($remaining <= 0)
+                        <div class="flex items-center justify-center gap-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 p-4 text-sm font-bold">
+                            Complet !
+                        </div>
+                    @elseif (auth()->check() && auth()->id() === $event->user_id)
+                        <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center space-y-3">
+                            <p class="text-sm text-slate-600">{{ __('Organizer own event hint') }}</p>
+                            <a href="{{ route('organizer.events.index') }}"
+                               class="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-ink text-white font-semibold px-4 py-3 text-sm hover:bg-slate-800 transition">
+                                {{ __('Manage my events') }}
+                            </a>
+                        </div>
+                    @elseif ($alreadyBooked)
+                        <div class="flex items-center gap-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 p-3 text-sm">
+                            <x-icon name="ticket" class="w-4 h-4 shrink-0" />
+                            <span>
+                                {{ $isFreeEvent ? __('Already booked free') : __('Already booked paid') }}
+                                <a href="{{ route('tickets.index') }}" class="underline font-semibold">{{ __('View my tickets') }}</a>
+                            </span>
+                        </div>
+                    @elseif ($event->ticketTypes->isEmpty())
+                        <div class="rounded-xl bg-amber-50 border border-amber-100 text-amber-800 p-4 text-sm text-center">
+                            {{ __('No ticket types configured') }}
+                        </div>
+                    @elseif ($purchasableTypes->isEmpty())
+                        <div class="rounded-xl bg-amber-50 border border-amber-100 text-amber-800 p-4 text-sm text-center">
+                            {{ __('No ticket types on sale now') }}
+                        </div>
+                    @else
+                        <a href="{{ route('tickets.choose', $event) }}" class="ep-btn w-full justify-center py-3 no-underline">
+                            <x-icon name="ticket" class="w-4 h-4" />
+                            {{ $isFreeEvent ? __('Catalog book free') : __('Catalog book paid') }}
+                        </a>
+                        <p class="text-[10px] text-center text-frost">
+                            {{ $isFreeEvent ? __('Checkout free hint') : __('Checkout paid hint') }}
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>

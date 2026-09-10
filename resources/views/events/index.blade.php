@@ -115,8 +115,26 @@
             </div>
         </section>
 
+        {{-- À la une --}}
+        @if ($showFeatured && $featuredEvents->isNotEmpty())
+            <section id="featured" class="bg-white dark:bg-[#0F0F0F] py-12 sm:py-14 border-b border-charcoal/[0.05] dark:border-white/10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="mb-8 sm:mb-10">
+                        <h2 class="text-xl sm:text-2xl font-bold text-charcoal dark:text-[#FAFAFA]">{{ __('Featured events') }}</h2>
+                        <p class="mt-2 text-sm text-frost">{{ __('Featured events subtitle') }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 py-2">
+                        @foreach ($featuredEvents as $event)
+                            <x-event-card :event="$event" />
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endif
+
         {{-- Catalogue --}}
-        <section id="events" class="bg-white dark:bg-[#0F0F0F] py-12 sm:py-14">
+        <section id="events" class="bg-surface-catalog/40 dark:bg-[#0F0F0F] py-12 sm:py-14">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-wrap items-end justify-between gap-3 mb-10">
                     <div>

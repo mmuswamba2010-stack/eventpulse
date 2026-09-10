@@ -35,9 +35,23 @@ Route::get('/locale/{locale}', LocaleController::class)->name('locale.switch');
 Route::get('/legal/organizer-terms', [\App\Http\Controllers\LegalController::class, 'organizerTerms'])
     ->name('legal.organizer-terms');
 
+Route::get('/events/{event}/tickets', [TicketController::class, 'choose'])
+    ->name('tickets.choose');
+
 Route::post('/events/{event}/book', [TicketController::class, 'store'])
     ->middleware('throttle:20,1')
     ->name('tickets.store');
+
+Route::get('/events/{event}/checkout/confirm', [TicketController::class, 'confirmCheckout'])
+    ->name('tickets.checkout.confirm');
+
+Route::post('/events/{event}/checkout/payment', [TicketController::class, 'updateCheckoutPayment'])
+    ->middleware('throttle:20,1')
+    ->name('tickets.checkout.payment');
+
+Route::post('/events/{event}/checkout/complete', [TicketController::class, 'completeCheckout'])
+    ->middleware('throttle:20,1')
+    ->name('tickets.checkout.complete');
 
 Route::get('/newsletter/unsubscribe/{token}', [NewsletterUnsubscribeController::class, 'show'])
     ->name('newsletter.unsubscribe');

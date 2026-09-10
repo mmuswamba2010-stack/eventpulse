@@ -95,4 +95,87 @@ class Money
     {
         return (string) config('eventpulse.currency.name', 'Franc congolais');
     }
+
+    /**
+     * Prix catalogue : une seule devise, lisible (pas de « 0,04 $ · 80 FC »).
+     */
+    public static function formatCatalog(float|int|null $amountInCdf, bool $free = true): string
+    {
+        if ($free && (float) $amountInCdf <= 0) {
+            return __('Free');
+        }
+
+        $mode = (string) config('eventpulse.catalog.price_currency', 'auto');
+
+        if ($mode === 'cdf') {
+            return self::format($amountInCdf, null, false);
+        }
+
+        if ($mode === 'usd' && self::usdEnabled()) {
+            return self::formatUsdValue(round(self::amountAsUsd($amountInCdf)), 0, false);
+        }
+
+        if ($mode === 'auto' && self::usdEnabled()) {
+            $usd = self::amountAsUsd($amountInCdf);
+
+            if ($usd >= 1) {
+                return self::formatUsdValue(round($usd), 0, false);
+            }
+        }
+
+        return self::format($amountInCdf, null, false);
+    }
+
+    /**
+     * Montant stocké → valeur USD pour affichage.
+     * ≥ 2 250 en base = francs (saisie organisateur convertie) · sinon = dollars.
+     */
+    public static function amountAsUsd(float|int|null $stored): float
+    {
+        $stored = (float) $stored;
+
+        if (! self::usdEnabled() || self::cdfPerUsd() <= 0) {
+            return $stored;
+        }
+
+        if ($stored >= self::cdfPerUsd()) {
+            return self::cdfToUsd($stored);
+        }
+
+        return $stored;
+    }
+
+    /**
+     * Fiche événement — billets à acheter affichés en dollars (sans double devise).
+     */
+    public static function formatEventPrice(float|int|null $amountInCdf, bool $free = true): string
+    {
+        if ($free && (float) $amountInCdf <= 0) {
+            return __('Free');
+        }
+
+        if (self::usdEnabled()) {
+            return self::formatUsdValue(round(self::amountAsUsd($amountInCdf)), 0, false);
+        }
+
+        return self::format($amountInCdf, null, false);
+    }
+
+    /**
+     * Page choix billet — ex. « 80 dollars ».
+     */
+    public static function formatEventPriceLabel(float|int|null $stored, bool $free = true): string
+    {
+        if ($free && (float) $stored <= 0) {
+            return __('Free');
+        }
+
+        if (self::usdEnabled()) {
+            $usd = number_format(round(self::amountAsUsd($stored)), 0, ',', ' ');
+
+            return __('Ticket price in dollars', ['amount' => $usd]);
+        }
+
+        return self::format($stored, null, false);
+    }
 }

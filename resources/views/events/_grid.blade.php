@@ -13,7 +13,7 @@
     </div>
 @else
     <div data-total="{{ $events->total() }}">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 py-2">
             @foreach ($events as $event)
                 <x-event-card :event="$event" />
             @endforeach

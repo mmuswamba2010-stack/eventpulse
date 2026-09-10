@@ -6,8 +6,19 @@
     'stacked' => false,
     'primary' => 'cdf',
     'onDark' => false,
+    'catalog' => false,
+    'ticketUsd' => false,
 ])
 
+@if ($catalog)
+    <span {{ $attributes->class(['text-charcoal dark:text-[#FAFAFA]']) }}>
+        {{ \App\Support\Money::formatCatalog($amount, $free) }}
+    </span>
+@elseif ($ticketUsd)
+    <span {{ $attributes->class(['text-charcoal dark:text-[#FAFAFA]']) }}>
+        {{ \App\Support\Money::formatEventPrice($amount, $free) }}
+    </span>
+@else
 @php
     $dual ??= ($primary === 'usd' && \App\Support\Money::usdEnabled());
     $amountCdf = (float) $amount;
@@ -44,4 +55,5 @@
     </span>
 @else
     <span {{ $attributes->class(['text-charcoal dark:text-[#FAFAFA]']) }}>{{ $main }}</span>
+@endif
 @endif

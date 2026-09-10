@@ -49,6 +49,8 @@ export default {
             boxShadow: {
                 card: '0 1px 0 rgba(15,15,15,0.06), 0 8px 24px rgba(15,15,15,0.04)',
                 lift: '0 12px 40px rgba(15,15,15,0.08)',
+                float: '0 2px 8px rgba(15,15,15,0.04), 0 16px 40px rgba(15,15,15,0.10)',
+                'float-hover': '0 8px 20px rgba(15,15,15,0.08), 0 28px 56px rgba(15,15,15,0.14)',
             },
         },
     },

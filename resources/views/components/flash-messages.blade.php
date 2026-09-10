@@ -1,4 +1,4 @@
-@if (session('success') || session('error'))
+@if (session('success') || session('error') || session('info'))
     <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-3">
         @if (session('success'))
             <div
@@ -26,6 +26,24 @@
             >
                 <x-icon name="exclamation-triangle" class="w-5 h-5 shrink-0 text-coral mt-0.5" />
                 <p class="flex-1 leading-relaxed">{{ session('error') }}</p>
+                <button
+                    type="button"
+                    onclick="this.closest('[role=alert]')?.remove()"
+                    class="shrink-0 rounded-md p-1 text-frost hover:text-charcoal dark:hover:text-[#FAFAFA] transition"
+                    aria-label="{{ __('Close') }}"
+                >
+                    <x-icon name="x-mark" class="w-4 h-4" />
+                </button>
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div
+                role="alert"
+                class="flash-alert flex items-start gap-3 ep-card px-5 py-3.5 text-sm font-medium text-charcoal dark:text-[#FAFAFA] border-l-4 border-l-sky-500 bg-sky-50 dark:bg-sky-500/10"
+            >
+                <x-icon name="check-circle" class="w-5 h-5 shrink-0 text-sky-600 dark:text-sky-400 mt-0.5" />
+                <p class="flex-1 leading-relaxed">{{ session('info') }}</p>
                 <button
                     type="button"
                     onclick="this.closest('[role=alert]')?.remove()"

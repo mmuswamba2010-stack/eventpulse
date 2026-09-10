@@ -60,11 +60,15 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <a href="{{ route('register.participant') }}" class="ep-btn-outline text-sm py-2.5 justify-center no-underline">
-                {{ __('Register as participant') }}
+                {{ __('Create participant account') }}
             </a>
             <a href="{{ route('register.organizer') }}" class="ep-btn-outline text-sm py-2.5 justify-center no-underline">
                 {{ __('Register as organizer') }}
             </a>
         </div>
     </form>
+
+    <a href="{{ route('events.index') }}" class="mt-6 block text-center text-sm font-medium text-frost hover:text-brand no-underline">
+        {{ __('Back to home') }}
+    </a>
 </x-guest-layout>

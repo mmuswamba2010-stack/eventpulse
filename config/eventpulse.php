@@ -33,6 +33,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Catalogue public — affichage prix (une seule devise, sans double ligne)
+    | auto = USD arrondi si ≥ 1 $, sinon FC · usd = toujours $ · cdf = toujours FC
+    |--------------------------------------------------------------------------
+    */
+
+    'catalog' => [
+        'price_currency' => env('EVENTPULSE_CATALOG_PRICE_CURRENCY', 'auto'),
+        'featured_count' => (int) env('EVENTPULSE_CATALOG_FEATURED_COUNT', 4),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Frais de publication (en francs congolais)
     |--------------------------------------------------------------------------
     */

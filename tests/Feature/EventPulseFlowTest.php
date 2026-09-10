@@ -104,6 +104,11 @@ class EventPulseFlowTest extends TestCase
             ->post("/events/{$event->id}/book", [
                 'ticket_type_id' => $typeId,
                 'quantity' => 2,
+            ])
+            ->assertRedirect("/events/{$event->id}/checkout/confirm");
+
+        $this->actingAs($participant)
+            ->post("/events/{$event->id}/checkout/complete", [
                 'payment_method' => 'cash',
             ])
             ->assertRedirect('/my-tickets');
@@ -159,11 +164,12 @@ class EventPulseFlowTest extends TestCase
             ->post("/events/{$event->id}/book", [
                 'ticket_type_id' => $typeId,
                 'quantity' => 1,
+            ])
+            ->assertRedirect("/events/{$event->id}/checkout/confirm");
+
+        $this->actingAs($participant)
+            ->post("/events/{$event->id}/checkout/complete", [
                 'payment_method' => 'card',
-                'card_name' => 'Amine Test',
-                'card_number' => '4242424242424242',
-                'card_expiry' => '12/29',
-                'card_cvc' => '123',
             ])
             ->assertRedirect('/my-tickets');
 
@@ -404,6 +410,10 @@ class EventPulseFlowTest extends TestCase
                 'ticket_type_id' => $typeId,
                 'quantity' => 1,
             ])
+            ->assertRedirect("/events/{$event->id}/checkout/confirm");
+
+        $this->actingAs($participant)
+            ->post("/events/{$event->id}/checkout/complete")
             ->assertRedirect('/my-tickets');
 
         $ticket = $event->tickets()->first();

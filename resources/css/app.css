@@ -43,11 +43,32 @@
     }
 
     .ep-event-card {
-        @apply bg-white border border-charcoal/[0.08] rounded-xl shadow-card overflow-hidden transition-shadow duration-200 hover:shadow-lift;
+        @apply bg-white rounded-2xl shadow-float overflow-hidden
+               border border-charcoal/[0.05]
+               transition-all duration-300 ease-out
+               hover:-translate-y-1.5 hover:shadow-float-hover hover:border-charcoal/[0.08];
     }
 
     .ep-btn-card {
-        @apply inline-flex items-center justify-center px-4 py-2 bg-coral text-white text-sm font-semibold rounded-lg shrink-0;
+        @apply flex items-center justify-center w-full px-4 py-2.5 bg-coral text-white text-sm font-semibold rounded-lg text-center
+               transition-all duration-300 ease-out;
+        box-shadow: 0 2px 10px rgba(255, 90, 54, 0.18);
+    }
+
+    .ep-btn-card:not(.opacity-50):hover {
+        @apply bg-coral-soft;
+        box-shadow:
+            0 0 18px rgba(255, 90, 54, 0.55),
+            0 0 36px rgba(255, 90, 54, 0.28),
+            0 6px 16px rgba(255, 90, 54, 0.32);
+        transform: translateY(-1px);
+    }
+
+    .ep-btn-card:not(.opacity-50):active {
+        transform: translateY(0);
+        box-shadow:
+            0 0 12px rgba(255, 90, 54, 0.4),
+            0 4px 10px rgba(255, 90, 54, 0.25);
     }
 
     .ep-input {
@@ -117,9 +138,12 @@
     color: #fafafa;
 }
 
-.dark .ep-card,
-.dark .ep-event-card {
+.dark .ep-card {
     @apply bg-[#1A1A1A] border-white/10;
+}
+
+.dark .ep-event-card {
+    @apply bg-[#1A1A1A] border-white/[0.08] shadow-float hover:shadow-float-hover hover:border-white/15;
 }
 
 .dark .ep-input {

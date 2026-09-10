@@ -295,4 +295,13 @@ class Event extends Model
     {
         return array_keys(self::CATEGORIES);
     }
+
+    public function soldTicketsCount(): int
+    {
+        if (isset($this->tickets_count)) {
+            return (int) $this->tickets_count;
+        }
+
+        return $this->tickets()->where('status', '!=', 'cancelled')->count();
+    }
 }

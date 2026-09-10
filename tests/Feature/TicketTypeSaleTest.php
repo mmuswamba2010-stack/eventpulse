@@ -66,15 +66,17 @@ class TicketTypeSaleTest extends TestCase
         return $event->fresh('ticketTypes');
     }
 
-    public function test_event_page_lists_multiple_ticket_tiers(): void
+    public function test_choose_page_lists_multiple_ticket_tiers(): void
     {
         $event = $this->publishedEvent();
 
-        $this->get(route('events.show', $event->slug))
+        $this->get(route('tickets.choose', $event))
             ->assertOk()
+            ->assertSee(__('Choose your ticket'), false)
             ->assertSee('Early Bird', false)
             ->assertSee('Standard', false)
-            ->assertSee('VIP', false);
+            ->assertSee('VIP', false)
+            ->assertSee(__('Choose ticket'), false);
     }
 
     public function test_inactive_ticket_type_cannot_be_purchased(): void
@@ -84,13 +86,13 @@ class TicketTypeSaleTest extends TestCase
         $type = $event->ticketTypes->firstWhere('name', 'Early Bird');
 
         $this->actingAs($participant)
-            ->from(route('events.show', $event->slug))
+            ->from(route('tickets.choose', $event))
             ->post(route('tickets.store', $event), [
                 'ticket_type_id' => $type->id,
                 'quantity' => 1,
                 'payment_method' => 'cash',
             ])
-            ->assertRedirect(route('events.show', $event->slug))
+            ->assertRedirect(route('tickets.choose', $event))
             ->assertSessionHas('error');
 
         $this->assertSame(0, $event->tickets()->count());
@@ -108,7 +110,7 @@ class TicketTypeSaleTest extends TestCase
         $this->assertSame(TicketType::SALE_UPCOMING, $type->saleStatus());
 
         $this->actingAs($participant)
-            ->from(route('events.show', $event->slug))
+            ->from(route('tickets.choose', $event))
             ->post(route('tickets.store', $event), [
                 'ticket_type_id' => $type->id,
                 'quantity' => 1,
@@ -127,6 +129,11 @@ class TicketTypeSaleTest extends TestCase
             ->post(route('tickets.store', $event), [
                 'ticket_type_id' => $type->id,
                 'quantity' => 1,
+            ])
+            ->assertRedirect(route('tickets.checkout.confirm', $event));
+
+        $this->actingAs($participant)
+            ->post(route('tickets.checkout.complete', $event), [
                 'payment_method' => 'cash',
             ])
             ->assertRedirect(route('tickets.index'));
