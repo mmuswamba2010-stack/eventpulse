@@ -40,10 +40,6 @@
             <div class="hidden lg:flex lg:items-center lg:gap-2">
                 <x-locale-theme-toggle />
 
-                <a href="{{ route('events.index') }}#hero-search" class="inline-flex items-center justify-center p-2 rounded-lg text-frost hover:text-charcoal dark:hover:text-[#FAFAFA] hover:bg-charcoal/[0.04] dark:hover:bg-white/10 transition" aria-label="{{ __('Search') }}">
-                    <x-icon name="magnifying-glass" class="w-5 h-5" />
-                </a>
-
                 @auth
                     <x-dropdown align="right" width="56">
                         <x-slot name="trigger">

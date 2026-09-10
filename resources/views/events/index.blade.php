@@ -33,8 +33,8 @@
          })"
          x-init="hydrate()">
 
-        {{-- Hero --}}
-        <section id="hero-search" class="relative overflow-hidden bg-white dark:bg-[#0F0F0F] border-b border-charcoal/[0.05] dark:border-white/10">
+        {{-- Hero — plein écran sous la barre de navigation --}}
+        <section id="hero-search" class="relative overflow-hidden bg-white dark:bg-[#0F0F0F] border-b border-charcoal/[0.05] dark:border-white/10 min-h-[calc(100dvh-4rem)] flex flex-col justify-center">
             <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
                 <div class="absolute -top-28 left-1/2 -translate-x-1/2">
                     <div class="h-[min(500px,78vw)] w-[min(900px,115vw)] rounded-full bg-gradient-to-b from-coral-muted/75 via-coral-muted/35 to-transparent blur-3xl"></div>
@@ -43,7 +43,7 @@
             </div>
             <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-white dark:to-[#0F0F0F]" aria-hidden="true"></div>
 
-            <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
+            <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16 text-center w-full">
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-charcoal dark:text-[#FAFAFA] leading-tight">
                     {{ __('Live unforgettable') }}<br class="hidden sm:inline">
                     <span class="bg-gradient-to-r from-coral to-brand-700 bg-clip-text text-transparent">{{ __('experiences.') }}</span>
@@ -85,7 +85,7 @@
         </section>
 
         {{-- Catégories --}}
-        <section id="categories" class="bg-cream/50 dark:bg-[#141414] py-12 sm:py-16">
+        <section id="categories" class="scroll-mt-16 bg-cream/50 dark:bg-[#141414] py-12 sm:py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-8 sm:mb-10">
                     <h2 class="text-xl sm:text-2xl font-bold text-charcoal dark:text-[#FAFAFA]">{{ __('Browse by category') }}</h2>
@@ -134,7 +134,7 @@
         @endif
 
         {{-- Catalogue --}}
-        <section id="events" class="bg-surface-catalog/40 dark:bg-[#0F0F0F] py-12 sm:py-14">
+        <section id="events" class="scroll-mt-16 bg-surface-catalog/40 dark:bg-[#0F0F0F] py-12 sm:py-14">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-wrap items-end justify-between gap-3 mb-10">
                     <div>

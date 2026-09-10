@@ -7,6 +7,11 @@
 }
 
 @layer base {
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 4rem;
+    }
+
     body {
         @apply bg-cream text-charcoal antialiased;
     }
